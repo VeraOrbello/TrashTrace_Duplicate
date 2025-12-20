@@ -179,6 +179,7 @@ foreach($notifications as $notification) {
                                 <button id="report-missed-btn" class="btn btn-action">Report Missed Pickup</button>
                                 <button id="track-complaint-btn" class="btn btn-action">Track Complaint Status</button>
                                  <button id="feedback-btn" class="btn btn-action">Feedback</button>
+                                <a href="barangay_register.php" class="btn btn-action">Application Status</a>
                             </div>
                     </div>
                 </div>
