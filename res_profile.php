@@ -258,7 +258,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["change_password"])){
                             <?php if($admin_application_status == 'pending'): ?>
                             <div class="worker-status pending">
                                 <i class="fas fa-user-shield"></i>
-                                <h3>Admin Application Pending</h3>
+                                <h3>Application Status: Pending</h3>
                                 <p>Your admin application has been submitted and is awaiting review by barangay administrators.</p>
                                 <div class="status-details">
                                     <p><strong>Applied:</strong> <?php echo date('M d, Y', strtotime($user_data['created_at'])); ?></p>
@@ -266,89 +266,24 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["change_password"])){
                                 </div>
                                 <p class="status-note">We will contact you via email or phone once your application is processed.</p>
                             </div>
-                            <?php elseif($worker_status == 'not_applied'): ?>
+                            <?php else: ?>
                             <div class="worker-status not-applied">
                                 <i class="fas fa-user-clock"></i>
-                                <h3>Not Yet Validated</h3>
-                                <p>You have not submitted a worker validation request.</p>
-                                <p>If you are an existing barangay worker, you can validate your account to access worker features.</p>
+                                <h3>Application Status: Regular User</h3>
+                                <p>You are currently a regular user. To become a barangay administrator, you need to register and get approved.</p>
+                                <p>Barangay administrators can manage schedules, approve applications, and oversee waste management operations.</p>
                                 <div class="benefits">
-                                    <h4>Benefits after validation:</h4>
+                                    <h4>Admin Benefits:</h4>
                                     <ul>
-                                        <li>Access to worker dashboard</li>
+                                        <li>Access to barangay dashboard</li>
                                         <li>Manage pickup schedules</li>
-                                        <li>Track work activities</li>
-                                        <li>Help improve waste management</li>
+                                        <li>Approve worker/driver applications</li>
+                                        <li>Generate reports and analytics</li>
+                                        <li>Oversee waste management operations</li>
                                     </ul>
                                 </div>
                                 <a href="barangay_register.php" class="btn btn-worker">
-                                    <i class="fas fa-user-check"></i> Get Validated as Worker
-                                </a>
-                            </div>
-                            <?php elseif($worker_status == 'pending'): ?>
-                            <div class="worker-status pending">
-                                <i class="fas fa-hourglass-half"></i>
-                                <h3>Validation Pending</h3>
-                                <p>Your worker validation request has been submitted and is awaiting review.</p>
-                                <div class="status-details">
-                                    <p><strong>Submitted:</strong> <?php echo date('M d, Y', strtotime($worker_data['submitted_at'])); ?></p>
-                                    <p><strong>Worker ID:</strong> <?php echo htmlspecialchars($worker_data['id_number']); ?></p>
-                                    <p><strong>Status:</strong> <span class="status-badge pending-badge">Pending Review</span></p>
-                                </div>
-                                <p class="status-note">We will contact you via email or phone once your validation is processed.</p>
-                            </div>
-                            <?php elseif($worker_status == 'reviewing'): ?>
-                            <div class="worker-status reviewing">
-                                <i class="fas fa-search"></i>
-                                <h3>Under Review</h3>
-                                <p>Your worker validation request is currently being reviewed by administrators.</p>
-                                <div class="status-details">
-                                    <p><strong>Submitted:</strong> <?php echo date('M d, Y', strtotime($worker_data['submitted_at'])); ?></p>
-                                    <p><strong>Worker ID:</strong> <?php echo htmlspecialchars($worker_data['id_number']); ?></p>
-                                    <p><strong>Status:</strong> <span class="status-badge reviewing-badge">Under Review</span></p>
-                                </div>
-                                <p class="status-note">Your application is being verified. This process usually takes 2-3 business days.</p>
-                            </div>
-                            <?php elseif($worker_status == 'accepted'): ?>
-                            <div class="worker-status approved">
-                                <i class="fas fa-check-circle"></i>
-                                <h3>Validation Accepted</h3>
-                                <p>Your worker account has been validated successfully!</p>
-                                <div class="status-details">
-                                      <p><strong>Accepted:</strong> <?php echo date('M d, Y', strtotime($worker_data['submitted_at'])); ?></p>
-                                    <p><strong>Worker ID:</strong> <?php echo htmlspecialchars($worker_data['id_number']); ?></p>
-                                    <p><strong>Status:</strong> <span class="status-badge approved-badge">Active Worker</span></p>
-                                </div>
-                                <div class="benefits">
-                                    <h4>You now have access to:</h4>
-                                    <ul>
-                                        <li>Worker dashboard</li>
-                                        <li>Schedule management</li>
-                                        <li>Work tracking</li>
-                                        <li>Community updates</li>
-                                    </ul>
-                                </div>
-                                <div class="action-buttons">
-                                    <a href="dashboard.php" class="btn btn-worker">
-                                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
-                                    </a>
-                                    <a href="res_schedule.php" class="btn btn-schedule">
-                                        <i class="fas fa-calendar"></i> View Schedule
-                                    </a>
-                                </div>
-                            </div>
-                            <?php elseif($worker_status == 'rejected'): ?>
-                            <div class="worker-status rejected">
-                                <i class="fas fa-times-circle"></i>
-                                <h3>Validation Rejected</h3>
-                                <p>Your worker validation request was not approved.</p>
-                                <div class="status-details">
-                                    <p><strong>Submitted:</strong> <?php echo date('M d, Y', strtotime($worker_data['submitted_at'])); ?></p>
-                                    <p><strong>Status:</strong> <span class="status-badge rejected-badge">Rejected</span></p>
-                                </div>
-                                <p class="status-note">If you believe this was a mistake, please contact your barangay administrator or submit a new validation request.</p>
-                                <a href="barangay_register.php" class="btn btn-worker">
-                                    <i class="fas fa-redo"></i> Submit New Validation
+                                    <i class="fas fa-user-shield"></i> Register as Admin
                                 </a>
                             </div>
                             <?php endif; ?>
