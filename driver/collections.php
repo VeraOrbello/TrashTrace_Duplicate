@@ -170,40 +170,51 @@ usort($collections, function($a, $b) {
 </head>
 <body>
     <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-recycle"></i>
-                    <span>TrashTrace Driver</span>
+      <!-- Replace the entire header section with this -->
+<header class="dashboard-header">
+    <!-- Grid Background Pattern -->
+    <div class="grid-background-nav"></div>
+    
+    <div class="header-content">
+        <a href="../driver_dashboard.php" class="logo">
+            <i class="fas fa-recycle"></i>
+            <span>TrashTrace Driver</span>
+        </a>
+        
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <nav id="mainNav">
+            <div class="nav-container">
+                <ul>
+                    <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+                    <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
+                    <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
+                    <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                    <li><a href="history.php" class="nav-link"><i class="fas fa-history"></i> <span>History</span></a></li>
+                    <li><a href="profile.php" class="nav-link active"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                </ul>
+            </div>
+        </nav>
+        
+        <div class="user-menu">
+            <div class="user-info" onclick="window.location.href='profile.php'">
+                <div class="user-avatar">
+                    <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
                 </div>
-                
-                <nav>
-                    <ul>
-                        <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                        <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
-                        <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> Routes</a></li>
-                        <li><a href="collections.php" class="nav-link active"><i class="fas fa-trash"></i> Collections</a></li>
-                        <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> Earnings</a></li>
-                    </ul>
-                </nav>
-                
-                <div class="user-menu">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
-                        </div>
-                        <div class="user-details">
-                            <h4><?php echo htmlspecialchars($driver_name); ?></h4>
-                            <p>Driver ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></p>
-                        </div>
-                    </div>
-                    <a href="../logout.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
-                    </a>
+                <div class="user-details">
+                    <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
+                    <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
                 </div>
             </div>
-        </header>
+            <a href="../logout.php" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+</header>
         
         <main class="dashboard-main">
             <div class="container">

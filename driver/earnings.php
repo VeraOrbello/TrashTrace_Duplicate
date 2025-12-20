@@ -155,36 +155,52 @@ function generateSampleEarnings() {
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Consolidated CSS -->
+    <!-- Earnings CSS -->
     <link rel="stylesheet" href="../css/driver/master-styles.css">
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Updated Navbar -->
         <header class="dashboard-header">
+            <!-- Grid Background Pattern -->
+            <div class="grid-background-nav"></div>
+            
             <div class="header-content">
-                <div class="logo">
+                <a href="../driver_dashboard.php" class="logo">
                     <i class="fas fa-recycle"></i>
                     <span>TrashTrace Driver</span>
-                </div>
+                </a>
                 
-                <nav>
-                    <ul>
-                        <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                        <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
-                        <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> Routes</a></li>
-                        <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> Collections</a></li>
-                        <li><a href="earnings.php" class="nav-link active"><i class="fas fa-money-bill-wave"></i> Earnings</a></li>
-                    </ul>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav id="mainNav">
+                    <div class="nav-container">
+                        <ul>
+                            <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                            <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+                            <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
+                            <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
+                            <li><a href="earnings.php" class="nav-link active"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                            <li><a href="history.php" class="nav-link"><i class="fas fa-history"></i> <span>History</span></a></li>
+                            <li><a href="profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                        </ul>
+                    </div>
                 </nav>
                 
                 <div class="user-menu">
-                    <div class="user-greeting">
-                        <i class="fas fa-user-circle"></i>
-                        Hello, <?php echo htmlspecialchars($driver_name); ?>
+                    <div class="user-info" onclick="window.location.href='profile.php'">
+                        <div class="user-avatar">
+                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
+                            <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
+                        </div>
                     </div>
-                    <a href="../logout.php" class="btn btn-outline">
+                    <a href="../logout.php" class="btn-logout">
                         <i class="fas fa-sign-out-alt"></i>
-                        Logout
                     </a>
                 </div>
             </div>
@@ -316,7 +332,7 @@ function generateSampleEarnings() {
                                                     </td>
                                                     <td>
                                                         <div style="font-weight: 500;"><?php echo htmlspecialchars($transaction['customer_name'] ?? 'N/A'); ?></div>
-                                                    <div style="font-size: 0.8rem; color: #999;">ID: <?php echo str_pad($transaction['id'] ?? 0, 6, '0', STR_PAD_LEFT); ?></div>
+                                                        <div style="font-size: 0.8rem; color: #999;">ID: <?php echo str_pad($transaction['id'] ?? 0, 6, '0', STR_PAD_LEFT); ?></div>
                                                     </td>
                                                     <td>
                                                         <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -442,6 +458,26 @@ function generateSampleEarnings() {
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mainNav = document.getElementById('mainNav');
+            
+            if(mobileMenuToggle && mainNav) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mainNav.classList.toggle('active');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if(window.innerWidth <= 900) {
+                        if(!mainNav.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+                            mainNav.classList.remove('active');
+                        }
+                    }
+                });
+            }
+            
             // Initialize Earnings Chart
             const ctx = document.getElementById('earningsChart').getContext('2d');
             const earningsChart = new Chart(ctx, {
@@ -541,46 +577,7 @@ function generateSampleEarnings() {
             // Export Transactions
             document.getElementById('exportTransactions').addEventListener('click', function() {
                 alert('Exporting transactions...');
-                // In a real application, this would generate and download a CSV/PDF
             });
-            
-            // Add CSS for payment badges
-            const style = document.createElement('style');
-            style.textContent = `
-                .payment-badge {
-                    padding: 4px 12px;
-                    border-radius: 12px;
-                    font-size: 0.75rem;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                .payment-cash {
-                    background: #e8f5e9;
-                    color: #2e7d32;
-                    border: 1px solid #c8e6c9;
-                }
-                
-                .payment-gcash {
-                    background: #e3f2fd;
-                    color: #1976d2;
-                    border: 1px solid #bbdefb;
-                }
-                
-                .payment-paymaya {
-                    background: #f3e5f5;
-                    color: #7b1fa2;
-                    border: 1px solid #e1bee7;
-                }
-                
-                .payment-online {
-                    background: #fff3e0;
-                    color: #ef6c00;
-                    border: 1px solid #ffe0b2;
-                }
-            `;
-            document.head.appendChild(style);
         });
     </script>
 </body>

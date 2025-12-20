@@ -142,37 +142,52 @@ function generateSampleHistory() {
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Consolidated CSS -->
+    <!-- History CSS -->
     <link rel="stylesheet" href="../css/driver/master-styles.css">
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Updated Navbar -->
         <header class="dashboard-header">
+            <!-- Grid Background Pattern -->
+            <div class="grid-background-nav"></div>
+            
             <div class="header-content">
-                <div class="logo">
+                <a href="../driver_dashboard.php" class="logo">
                     <i class="fas fa-recycle"></i>
                     <span>TrashTrace Driver</span>
-                </div>
+                </a>
                 
-                <nav>
-                    <ul>
-                        <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                        <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
-                        <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> Routes</a></li>
-                        <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> Collections</a></li>
-                        <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> Earnings</a></li>
-                        <li><a href="history.php" class="nav-link active"><i class="fas fa-history"></i> History</a></li>
-                    </ul>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav id="mainNav">
+                    <div class="nav-container">
+                        <ul>
+                            <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                            <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+                            <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
+                            <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
+                            <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                            <li><a href="history.php" class="nav-link active"><i class="fas fa-history"></i> <span>History</span></a></li>
+                            <li><a href="profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                        </ul>
+                    </div>
                 </nav>
                 
                 <div class="user-menu">
-                    <div class="user-greeting">
-                        <i class="fas fa-user-circle"></i>
-                        Hello, <?php echo htmlspecialchars($driver_name); ?>
+                    <div class="user-info" onclick="window.location.href='profile.php'">
+                        <div class="user-avatar">
+                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
+                            <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
+                        </div>
                     </div>
-                    <a href="../logout.php" class="btn btn-outline">
+                    <a href="../logout.php" class="btn-logout">
                         <i class="fas fa-sign-out-alt"></i>
-                        Logout
                     </a>
                 </div>
             </div>
@@ -430,6 +445,26 @@ function generateSampleHistory() {
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mainNav = document.getElementById('mainNav');
+            
+            if(mobileMenuToggle && mainNav) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mainNav.classList.toggle('active');
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if(window.innerWidth <= 900) {
+                        if(!mainNav.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+                            mainNav.classList.remove('active');
+                        }
+                    }
+                });
+            }
+            
             // Reset Filters
             document.getElementById('resetFilters').addEventListener('click', function() {
                 window.location.href = 'history.php';
@@ -557,7 +592,6 @@ function generateSampleHistory() {
                 button.addEventListener('click', function() {
                     const itemId = this.getAttribute('data-id');
                     if(confirm('Print receipt for collection #' + itemId + '?')) {
-                        // In a real application, this would open a print dialog
                         window.open('receipt.php?id=' + itemId, '_blank');
                     }
                 });
@@ -591,23 +625,11 @@ function generateSampleHistory() {
         
         function printDetails(id) {
             alert('Printing receipt for collection #' + id);
-            // In a real application, this would open a print dialog
         }
         
         function sendReceipt(id) {
             alert('Sending receipt to customer for collection #' + id);
-            // In a real application, this would send an email/SMS
         }
-        
-        // Add spinner animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
