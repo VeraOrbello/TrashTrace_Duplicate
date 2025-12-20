@@ -661,15 +661,49 @@ $stats['today'] = $stats['today'] ?? 0;
                 location.reload();
             }
             
-            // Check for success messages in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('success')) {
-                if (urlParams.get('success') === 'marked_all') {
-                    showToast('All notifications marked as read!', 'success');
-                    // Remove parameter from URL without reload
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
+    // Check for success messages in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success')) {
+        if (urlParams.get('success') === 'marked_all') {
+            showToast('All notifications marked as read!', 'success');
+            // Remove parameter from URL without reload
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+
+    // Real-time notifications polling
+    let lastNotificationCount = <?php echo $stats['total']; ?>;
+    function checkForNewNotifications() {
+        fetch('php/check_new_notifications.php', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
             }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.new_count > 0) {
+                // Update notification count in navbar
+                const badge = document.querySelector('.nav-link.active .badge');
+                if (badge) {
+                    const currentCount = parseInt(badge.textContent) || 0;
+                    badge.textContent = currentCount + data.new_count;
+                }
+                // Optionally show a toast for new notifications
+                showToast(`You have ${data.new_count} new notification(s)!`, 'info');
+                // Refresh the page to show new notifications
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.log('Error checking for new notifications:', error);
+        });
+    }
+
+    // Check for new notifications every 30 seconds
+    setInterval(checkForNewNotifications, 30000);
         });
     </script>
 </body>
