@@ -1,0 +1,23 @@
+.modal{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2000;
+}
+.modal-content{
+    width:100%;
+    max-width:640px;
+    background:#fff;
+    padding:16px;
+    border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.15);
+    position:relative;
+}
+.modal-close{position:absolute;right:12px;top:8px;font-size:22px;cursor:pointer}
+.modal .form-group{margin-bottom:10px}
+.modal label{display:block;margin-bottom:4px;font-weight:600}
+.modal input[type="text"], .modal textarea, .modal select{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
+.modal .btn{margin-right:8px}

@@ -1,0 +1,396 @@
+/* login.css - Login Page with Montserrat font */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    /* GRID TILE BACKGROUND - Same as register */
+    background-color: #ffffff;
+    background-image: 
+        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Two Column Container - Same as register */
+.two-column-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 700px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+/* Left Column - Image/Placeholder - Same as register */
+.left-column {
+    flex: 1;
+    background: url(../assets/images/column1.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.left-column .logo {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.image-placeholder {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.image-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.image-content p {
+    font-size: 18px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.image-features {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.feature-icon {
+    font-size: 24px;
+}
+
+.feature-text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.placeholder-graphic {
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 300px;
+    height: 300px;
+    opacity: 0.1;
+}
+
+.graphic-circle {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border: 3px solid white;
+    border-radius: 50%;
+    top: 0;
+    right: 0;
+}
+
+.graphic-square {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 3px solid white;
+    top: 50px;
+    right: 100px;
+}
+
+.graphic-triangle {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 75px solid transparent;
+    border-right: 75px solid transparent;
+    border-bottom: 130px solid white;
+    top: 100px;
+    right: 200px;
+    opacity: 0.3;
+}
+
+/* Right Column - Login Form */
+.right-column {
+    flex: 1.2;
+    padding: 40px;
+    overflow-y: auto;
+    max-height: 700px;
+}
+
+.login-form-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: #666;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* Form Styles - Same as register */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s;
+    background: #f8f9fa;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2ecc71;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+}
+
+.form-control.is-invalid {
+    border-color: #e74c3c;
+}
+
+.invalid-feedback {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Password Input with Toggle */
+.password-group {
+    position: relative;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 18px;
+    color: #666;
+}
+
+.eye-icon {
+    font-style: normal;
+}
+
+/* Remember Me Checkbox */
+.remember-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.remember-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remember-group label {
+    margin: 0;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Error Message */
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+}
+
+.alert-error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+/* Button - Same as register */
+.btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #2ecc71;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Form Links - Same as register */
+.form-links {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #666;
+}
+
+.form-links a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.form-links a:hover {
+    text-decoration: underline;
+}
+
+.form-links p {
+    margin-top: 15px;
+    margin-bottom: 0;
+}
+
+/* Responsive Design - Same as register */
+@media (max-width: 992px) {
+    .two-column-container {
+        flex-direction: column;
+        max-width: 600px;
+    }
+    
+    .left-column {
+        padding: 30px;
+        min-height: 300px;
+    }
+    
+    .right-column {
+        padding: 30px;
+        max-height: none;
+    }
+    
+    .placeholder-graphic {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .two-column-container {
+        border-radius: 20px;
+    }
+    
+    .left-column,
+    .right-column {
+        padding: 25px;
+    }
+    
+    .left-column .logo {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+    
+    .image-content h1 {
+        font-size: 24px;
+    }
+    
+    .image-content p {
+        font-size: 16px;
+    }
+    
+    .form-header h2 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .two-column-container {
+        border-radius: 16px;
+    }
+    
+    .left-column,
+    .right-column {
+        padding: 20px;
+    }
+    
+    .form-header h2 {
+        font-size: 22px;
+    }
+}
