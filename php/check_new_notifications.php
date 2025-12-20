@@ -9,12 +9,13 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true){
 }
 
 $user_id = $_SESSION['user_id'] ?? 0;
+$user_barangay = $_SESSION['barangay'] ?? '';
 $last_check = isset($_GET['last_check']) ? $_GET['last_check'] : null;
 
 try {
-    $query = "SELECT COUNT(*) as new_count FROM notifications WHERE user_id = ? AND is_read = 0";
-    $params = [$user_id];
-    $types = "i";
+    $query = "SELECT COUNT(*) as new_count FROM notifications WHERE (user_id = ? OR (user_id IS NULL AND barangay = ?)) AND is_read = 0";
+    $params = [$user_id, $user_barangay];
+    $types = "is";
 
     if ($last_check) {
         $query .= " AND created_at > ?";

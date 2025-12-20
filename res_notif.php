@@ -18,37 +18,38 @@ $user_type = $_SESSION['user_type'] ?? '';
 
 // Get resident ID from session
 $resident_id = $_SESSION['user_id'] ?? 0;
+$user_barangay = $_SESSION['barangay'] ?? '';
 
 // Handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['mark_as_read'])) {
         $notification_id = $_POST['notification_id'];
-        $update_query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND resident_id = ?";
+        $update_query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND (user_id = ? OR (user_id IS NULL AND barangay = ?))";
         $stmt = $link->prepare($update_query);
-        $stmt->bind_param("ii", $notification_id, $resident_id);
+        $stmt->bind_param("iis", $notification_id, $resident_id, $user_barangay);
         $stmt->execute();
-        
+
         echo json_encode(['success' => true]);
         exit();
     }
-    
+
     if (isset($_POST['delete_notification'])) {
         $notification_id = $_POST['notification_id'];
-        $delete_query = "DELETE FROM notifications WHERE id = ? AND resident_id = ?";
+        $delete_query = "DELETE FROM notifications WHERE id = ? AND (user_id = ? OR (user_id IS NULL AND barangay = ?))";
         $stmt = $link->prepare($delete_query);
-        $stmt->bind_param("ii", $notification_id, $resident_id);
+        $stmt->bind_param("iis", $notification_id, $resident_id, $user_barangay);
         $stmt->execute();
-        
+
         echo json_encode(['success' => true]);
         exit();
     }
-    
+
     if (isset($_POST['mark_all_read'])) {
-        $update_query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE resident_id = ? AND is_read = 0";
+        $update_query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE (user_id = ? OR (user_id IS NULL AND barangay = ?)) AND is_read = 0";
         $stmt = $link->prepare($update_query);
-        $stmt->bind_param("i", $resident_id);
+        $stmt->bind_param("is", $resident_id, $user_barangay);
         $stmt->execute();
-        
+
         header("Location: res_notif.php?success=marked_all");
         exit();
     }
@@ -85,10 +86,10 @@ if ($table_check && $table_check->num_rows > 0) {
                          ELSE 'normal'
                      END as priority
               FROM notifications n
-              WHERE n.user_id = ?";
+              WHERE (n.user_id = ? OR (n.user_id IS NULL AND n.barangay = ?))";
 
-    $params = [$resident_id];
-    $types = "i";
+    $params = [$resident_id, $user_barangay];
+    $types = "is";
 
     switch ($filter) {
         case 'unread':
@@ -123,10 +124,10 @@ if ($table_check && $table_check->num_rows > 0) {
         SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread,
         SUM(CASE WHEN type IN ('pickup_delayed', 'emergency') THEN 1 ELSE 0 END) as important,
         SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today
-        FROM notifications WHERE user_id = ?";
-    
+        FROM notifications WHERE (user_id = ? OR (user_id IS NULL AND barangay = ?))";
+
     if ($stmt = $link->prepare($stats_query)) {
-        $stmt->bind_param("i", $resident_id);
+        $stmt->bind_param("is", $resident_id, $user_barangay);
         $stmt->execute();
         $stats_result = $stmt->get_result();
         if ($stats_result) {
@@ -141,9 +142,9 @@ if ($table_check && $table_check->num_rows > 0) {
             'title' => 'Collection Schedule Updated',
             'message' => 'Your waste collection schedule has been updated to every Wednesday.',
             'created_at' => date('Y-m-d H:i:s', strtotime('-2 hours')),
-            'notification_type' => 'schedule_change',
+            'type' => 'pickup_delayed',
             'is_read' => 0,
-            'priority' => 'medium',
+            'priority' => 'high',
             'type_display' => 'Schedule Change'
         ],
         [
@@ -151,29 +152,29 @@ if ($table_check && $table_check->num_rows > 0) {
             'title' => 'Payment Successful',
             'message' => 'Your payment of ₱150.00 has been processed successfully.',
             'created_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
-            'notification_type' => 'payment_reminder',
+            'type' => 'general',
             'is_read' => 0,
-            'priority' => 'low',
-            'type_display' => 'Payment Reminder'
+            'priority' => 'normal',
+            'type_display' => 'General'
         ],
         [
             'id' => 3,
             'title' => 'Important Announcement',
             'message' => 'No collection on December 25, 2023 due to Christmas holiday.',
             'created_at' => date('Y-m-d H:i:s', strtotime('-3 days')),
-            'notification_type' => 'important_announcement',
+            'type' => 'emergency',
             'is_read' => 1,
             'priority' => 'high',
-            'type_display' => 'Important Announcement'
+            'type_display' => 'Emergency'
         ],
         [
             'id' => 4,
             'title' => 'Collection Scheduled',
             'message' => 'Your waste collection is scheduled for tomorrow at 8:00 AM.',
             'created_at' => date('Y-m-d H:i:s', strtotime('-5 days')),
-            'notification_type' => 'collection_scheduled',
+            'type' => 'pickup_scheduled',
             'is_read' => 1,
-            'priority' => 'medium',
+            'priority' => 'normal',
             'type_display' => 'Collection Scheduled'
         ]
     ];
@@ -476,18 +477,18 @@ $stats['today'] = $stats['today'] ?? 0;
                                 <?php foreach ($notifications as $notification): ?>
                                     <div class="notification-card p-3 <?php echo (!$notification['is_read']) ? 'unread' : ''; ?> <?php echo ($notification['priority'] == 'high') ? 'important' : ''; ?>">
                                         <div class="d-flex align-items-start">
-                                            <div class="notification-icon 
-                                                <?php echo $notification['notification_type'] == 'collection_scheduled' ? 'bg-success text-white' : 
-                                                      ($notification['notification_type'] == 'collection_completed' ? 'bg-primary text-white' : 
-                                                      ($notification['notification_type'] == 'schedule_change' ? 'bg-warning text-dark' : 
-                                                      ($notification['notification_type'] == 'payment_reminder' ? 'bg-danger text-white' : 'bg-secondary text-white'))); ?>">
-                                                <?php if ($notification['notification_type'] == 'collection_scheduled'): ?>
+                                            <div class="notification-icon
+                                                <?php echo $notification['type'] == 'pickup_scheduled' ? 'bg-success text-white' :
+                                                      ($notification['type'] == 'pickup_completed' ? 'bg-primary text-white' :
+                                                      ($notification['type'] == 'pickup_delayed' ? 'bg-warning text-dark' :
+                                                      ($notification['type'] == 'pickup_cancelled' ? 'bg-danger text-white' : 'bg-secondary text-white'))); ?>">
+                                                <?php if ($notification['type'] == 'pickup_scheduled'): ?>
                                                     <i class="fas fa-truck"></i>
-                                                <?php elseif ($notification['notification_type'] == 'collection_completed'): ?>
+                                                <?php elseif ($notification['type'] == 'pickup_completed'): ?>
                                                     <i class="fas fa-check-circle"></i>
-                                                <?php elseif ($notification['notification_type'] == 'schedule_change'): ?>
+                                                <?php elseif ($notification['type'] == 'pickup_delayed'): ?>
                                                     <i class="fas fa-calendar-times"></i>
-                                                <?php elseif ($notification['notification_type'] == 'payment_reminder'): ?>
+                                                <?php elseif ($notification['type'] == 'pickup_cancelled'): ?>
                                                     <i class="fas fa-money-bill-wave"></i>
                                                 <?php else: ?>
                                                     <i class="fas fa-bullhorn"></i>
@@ -500,11 +501,11 @@ $stats['today'] = $stats['today'] ?? 0;
                                                         <p class="mb-2"><?php echo htmlspecialchars($notification['message']); ?></p>
                                                         
                                                         <div class="d-flex align-items-center">
-                                                            <span class="type-badge 
-                                                                <?php echo $notification['notification_type'] == 'collection_scheduled' ? 'bg-success' : 
-                                                                      ($notification['notification_type'] == 'collection_completed' ? 'bg-primary' : 
-                                                                      ($notification['notification_type'] == 'schedule_change' ? 'bg-warning' : 
-                                                                      ($notification['notification_type'] == 'payment_reminder' ? 'bg-danger' : 'bg-secondary'))); ?> text-white me-2">
+                                                            <span class="type-badge
+                                                                <?php echo $notification['type'] == 'pickup_scheduled' ? 'bg-success' :
+                                                                      ($notification['type'] == 'pickup_completed' ? 'bg-primary' :
+                                                                      ($notification['type'] == 'pickup_delayed' ? 'bg-warning' :
+                                                                      ($notification['type'] == 'pickup_cancelled' ? 'bg-danger' : 'bg-secondary'))); ?> text-white me-2">
                                                                 <?php echo $notification['type_display']; ?>
                                                             </span>
                                                             
