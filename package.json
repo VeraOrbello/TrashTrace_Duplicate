@@ -1,0 +1,27 @@
+{
+  "name": "trashtracee",
+  "version": "1.0.0",
+  "description": "TRASH-TRACE is a small PHP web app for tracking trash collection and notifications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VeraOrbello/TrashTrace.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VeraOrbello/TrashTrace/issues"
+  },
+  "homepage": "https://github.com/VeraOrbello/TrashTrace#readme",
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "chart.js": "^4.5.1",
+    "express": "^5.2.1"
+  }
+}

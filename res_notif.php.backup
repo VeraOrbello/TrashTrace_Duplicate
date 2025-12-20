@@ -1,0 +1,989 @@
+<?php
+require_once "config.php";
+session_start();
+
+// Check if user is logged in
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+    header("location: login.php");
+    exit;
+}
+
+$page_title = "Resident Notifications";
+$page_icon = "fas fa-bell";
+
+// Sample notifications data for residents
+$notifications = [
+    [
+        'id' => 1,
+        'title' => 'Collection Schedule Updated',
+        'message' => 'Your waste collection schedule has been updated to every Wednesday.',
+        'time' => '2 hours ago',
+        'type' => 'info',
+        'read' => false
+    ],
+    [
+        'id' => 2,
+        'title' => 'Payment Successful',
+        'message' => 'Your payment of ₱150.00 has been processed successfully.',
+        'time' => '1 day ago',
+        'type' => 'success',
+        'read' => false
+    ],
+    [
+        'id' => 3,
+        'title' => 'Collection Reminder',
+        'message' => 'Remember to place your trash bins outside by 8 AM tomorrow.',
+        'time' => '2 days ago',
+        'type' => 'warning',
+        'read' => true
+    ],
+    [
+        'id' => 4,
+        'title' => 'New Collection Points',
+        'message' => 'New collection points have been added in your area.',
+        'time' => '3 days ago',
+        'type' => 'info',
+        'read' => true
+    ],
+    [
+        'id' => 5,
+        'title' => 'Service Announcement',
+        'message' => 'There will be no collection on Independence Day, June 12.',
+        'time' => '5 days ago',
+        'type' => 'warning',
+        'read' => true
+    ]
+];
+
+$stats = [
+    'total' => count($notifications),
+    'unread' => count(array_filter($notifications, function($n) { return !$n['read']; })),
+    'today' => 2,
+    'this_week' => count($notifications)
+];
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title; ?> - TrashTrace</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary-color: #3498db;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+            --medium-text: #7f8c8d;
+            --light-text: #95a5a6;
+            --border-color: #e0e0e0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --card-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f9f7 0%, #e8f5e9 100%);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo i {
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 50px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: var(--primary-dark);
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .page-title {
+            color: var(--primary-dark);
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-subtitle {
+            color: var(--medium-text);
+            font-size: 1.1rem;
+            max-width: 600px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+        
+        .stat-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+        }
+        
+        .icon-total { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
+        .icon-unread { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .icon-today { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .icon-week { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 0.2rem;
+            line-height: 1;
+        }
+        
+        .stat-info p {
+            color: var(--medium-text);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .notifications-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-bg);
+        }
+        
+        .card-header h3 {
+            color: var(--dark-text);
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #219653);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+        
+        .notification-item:hover {
+            background: rgba(46, 204, 113, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .notification-item.unread {
+            background: rgba(46, 204, 113, 0.15);
+            border-left-color: var(--primary-color);
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .icon-info { background: var(--secondary-color); }
+        .icon-success { background: var(--success-color); }
+        .icon-warning { background: var(--warning-color); }
+        .icon-error { background: var(--danger-color); }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-content h4 {
+            font-size: 1rem;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .notification-content p {
+            font-size: 0.9rem;
+            color: var(--medium-text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-mark-read {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .btn-mark-read:hover {
+            background: rgba(46, 204, 113, 0.2);
+        }
+        
+        .btn-delete {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--medium-text);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            color: var(--medium-text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: var(--light-text);
+            margin-bottom: 1.5rem;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--medium-text);
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .user-menu {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .notification-item {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .notification-actions {
+                margin-left: 0;
+                justify-content: flex-end;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .stat-card, .notifications-container {
+                padding: 1.2rem;
+            }
+            
+            .stat-info h3 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .toast-success { border-left-color: var(--success-color); }
+        .toast-error { border-left-color: var(--danger-color); }
+        .toast-warning { border-left-color: var(--warning-color); }
+        .toast-info { border-left-color: var(--secondary-color); }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-recycle"></i>
+                    <span>TrashTrace Resident</span>
+                </div>
+                
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <?php 
+                            $initial = isset($_SESSION['full_name']) ? strtoupper(substr($_SESSION['full_name'], 0, 1)) : 'R';
+                            echo $initial;
+                            ?>
+                        </div>
+                        <div class="user-details">
+                            <h4><?php echo isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : 'Resident'; ?></h4>
+                            <p>Resident Portal</p>
+                        </div>
+                    </div>
+                    <a href="logout.php" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <a href="res-dashboard.php" class="nav-tab">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="res-notif.php" class="nav-tab active">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <a href="res-schedule.php" class="nav-tab">
+                    <i class="fas fa-calendar"></i> Schedule
+                </a>
+                <a href="res-payments.php" class="nav-tab">
+                    <i class="fas fa-money-bill-wave"></i> Payments
+                </a>
+                <a href="res-profile.php" class="nav-tab">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+            </div>
+        </header>
+        
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="<?php echo $page_icon; ?>"></i>
+                <?php echo $page_title; ?>
+            </h1>
+            <p class="page-subtitle">Stay updated with your waste collection notifications and announcements.</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-icon icon-total">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $stats['total']; ?></h3>
+                        <p>Total Notifications</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-icon icon-unread">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $stats['unread']; ?></h3>
+                        <p>Unread</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-icon icon-today">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $stats['today']; ?></h3>
+                        <p>Today</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-icon icon-week">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $stats['this_week']; ?></h3>
+                        <p>This Week</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="notifications-container">
+            <div class="card-header">
+                <h3><i class="fas fa-list"></i> All Notifications</h3>
+                <div>
+                    <button class="btn btn-secondary" id="markAllRead">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                    <button class="btn btn-primary" id="refreshNotifications">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="unread">Unread</button>
+                <button class="filter-btn" data-filter="today">Today</button>
+                <button class="filter-btn" data-filter="week">This Week</button>
+                <button class="filter-btn" data-filter="important">Important</button>
+            </div>
+            
+            <?php if(empty($notifications)): ?>
+                <div class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3>No Notifications</h3>
+                    <p>You don't have any notifications yet. Check back later for updates.</p>
+                    <button class="btn btn-primary" id="checkForUpdates">
+                        <i class="fas fa-sync"></i> Check for Updates
+                    </button>
+                </div>
+            <?php else: ?>
+                <div class="notification-list" id="notificationList">
+                    <?php foreach($notifications as $notification): ?>
+                    <div class="notification-item <?php echo $notification['read'] ? '' : 'unread'; ?>" 
+                         data-id="<?php echo $notification['id']; ?>"
+                         data-type="<?php echo $notification['type']; ?>">
+                        <div class="notification-icon icon-<?php echo $notification['type']; ?>">
+                            <i class="fas fa-<?php echo $notification['type'] == 'success' ? 'check-circle' : 
+                                               ($notification['type'] == 'warning' ? 'exclamation-triangle' : 
+                                               ($notification['type'] == 'error' ? 'times-circle' : 'info-circle')); ?>"></i>
+                        </div>
+                        
+                        <div class="notification-content">
+                            <h4><?php echo htmlspecialchars($notification['title']); ?></h4>
+                            <p><?php echo htmlspecialchars($notification['message']); ?></p>
+                            <div class="notification-time">
+                                <i class="fas fa-clock"></i>
+                                <?php echo $notification['time']; ?>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-actions">
+                            <?php if(!$notification['read']): ?>
+                                <button class="btn-action btn-mark-read mark-read" data-id="<?php echo $notification['id']; ?>">
+                                    <i class="fas fa-check"></i> Read
+                                </button>
+                            <?php endif; ?>
+                            <button class="btn-action btn-delete delete-notification" data-id="<?php echo $notification['id']; ?>">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <script>
+        // Filter notifications
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                filterNotifications(filter);
+            });
+        });
+        
+        function filterNotifications(filter) {
+            const notifications = document.querySelectorAll('.notification-item');
+            
+            notifications.forEach(notification => {
+                const isUnread = notification.classList.contains('unread');
+                const type = notification.getAttribute('data-type');
+                
+                let show = true;
+                
+                switch(filter) {
+                    case 'unread':
+                        show = isUnread;
+                        break;
+                    case 'today':
+                        // Simple today filter (in production would check dates)
+                        show = Math.random() > 0.5; // Demo
+                        break;
+                    case 'week':
+                        // Simple week filter
+                        show = true;
+                        break;
+                    case 'important':
+                        show = type === 'warning' || type === 'error';
+                        break;
+                }
+                
+                notification.style.display = show ? 'flex' : 'none';
+            });
+        }
+        
+        // Mark as read
+        document.querySelectorAll('.mark-read').forEach(button => {
+            button.addEventListener('click', function() {
+                const notificationId = this.getAttribute('data-id');
+                const notification = this.closest('.notification-item');
+                
+                // Remove unread class
+                notification.classList.remove('unread');
+                
+                // Remove the mark-read button
+                this.remove();
+                
+                // Update unread count
+                updateUnreadCount();
+                
+                showToast('Notification marked as read', 'success');
+            });
+        });
+        
+        // Mark all as read
+        document.getElementById('markAllRead').addEventListener('click', function() {
+            document.querySelectorAll('.notification-item.unread').forEach(notification => {
+                notification.classList.remove('unread');
+                const markReadBtn = notification.querySelector('.mark-read');
+                if (markReadBtn) {
+                    markReadBtn.remove();
+                }
+            });
+            
+            updateUnreadCount();
+            showToast('All notifications marked as read', 'success');
+        });
+        
+        // Delete notification
+        document.querySelectorAll('.delete-notification').forEach(button => {
+            button.addEventListener('click', function() {
+                const notificationId = this.getAttribute('data-id');
+                const notification = this.closest('.notification-item');
+                
+                if (confirm('Delete this notification?')) {
+                    notification.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => {
+                        notification.remove();
+                        updateNotificationCounts();
+                        showToast('Notification deleted', 'success');
+                    }, 300);
+                }
+            });
+        });
+        
+        // Refresh notifications
+        document.getElementById('refreshNotifications').addEventListener('click', function() {
+            showToast('Refreshing notifications...', 'info');
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        });
+        
+        // Check for updates
+        document.getElementById('checkForUpdates')?.addEventListener('click', function() {
+            showToast('Checking for new notifications...', 'info');
+            // In production, this would make an API call
+            setTimeout(() => {
+                showToast('No new notifications found', 'info');
+            }, 1000);
+        });
+        
+        // Update notification counts
+        function updateNotificationCounts() {
+            const totalNotifications = document.querySelectorAll('.notification-item').length;
+            const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+            
+            // Update stats display (simplified for demo)
+            console.log('Total:', totalNotifications, 'Unread:', unreadCount);
+        }
+        
+        // Update unread count
+        function updateUnreadCount() {
+            const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+            // In production, update the unread count in the stats card
+            console.log('Unread count:', unreadCount);
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                 type === 'error' ? 'exclamation-circle' : 
+                                 type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+            
+            // Click to dismiss
+            toast.addEventListener('click', () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationCounts();
+        });
+    </script>
+</body>
+</html>
