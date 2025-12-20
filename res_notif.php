@@ -70,19 +70,22 @@ $stats = [
 $table_check = $link->query("SHOW TABLES LIKE 'notifications'");
 if ($table_check && $table_check->num_rows > 0) {
     // Build query based on filter
-    $query = "SELECT n.*, 
-                     c.username as collector_name,
-                     CASE 
-                         WHEN n.notification_type = 'collection_scheduled' THEN 'Collection Scheduled'
-                         WHEN n.notification_type = 'collection_completed' THEN 'Collection Completed'
-                         WHEN n.notification_type = 'schedule_change' THEN 'Schedule Change'
-                         WHEN n.notification_type = 'payment_reminder' THEN 'Payment Reminder'
-                         WHEN n.notification_type = 'important_announcement' THEN 'Important Announcement'
-                         ELSE n.notification_type
-                     END as type_display
+    $query = "SELECT n.*,
+                     CASE
+                         WHEN n.type = 'pickup_scheduled' THEN 'Collection Scheduled'
+                         WHEN n.type = 'pickup_completed' THEN 'Collection Completed'
+                         WHEN n.type = 'pickup_delayed' THEN 'Schedule Change'
+                         WHEN n.type = 'pickup_cancelled' THEN 'Collection Cancelled'
+                         WHEN n.type = 'emergency' THEN 'Emergency'
+                         WHEN n.type = 'general' THEN 'General'
+                         ELSE n.type
+                     END as type_display,
+                     CASE
+                         WHEN n.type IN ('pickup_delayed', 'emergency') THEN 'high'
+                         ELSE 'normal'
+                     END as priority
               FROM notifications n
-              LEFT JOIN collectors c ON n.collector_id = c.id
-              WHERE n.resident_id = ?";
+              WHERE n.user_id = ?";
 
     $params = [$resident_id];
     $types = "i";
@@ -98,7 +101,7 @@ if ($table_check && $table_check->num_rows > 0) {
             $query .= " AND n.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
             break;
         case 'important':
-            $query .= " AND n.priority = 'high'";
+            $query .= " AND n.type IN ('pickup_delayed', 'emergency')";
             break;
     }
 
@@ -115,12 +118,12 @@ if ($table_check && $table_check->num_rows > 0) {
     }
 
     // Get statistics
-    $stats_query = "SELECT 
+    $stats_query = "SELECT
         COUNT(*) as total,
         SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) as unread,
-        SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) as important,
+        SUM(CASE WHEN type IN ('pickup_delayed', 'emergency') THEN 1 ELSE 0 END) as important,
         SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today
-        FROM notifications WHERE resident_id = ?";
+        FROM notifications WHERE user_id = ?";
     
     if ($stmt = $link->prepare($stats_query)) {
         $stmt->bind_param("i", $resident_id);
