@@ -55,51 +55,64 @@ $default_lng = 123.8854;
             }
         }
         
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        
         .dashboard-card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(0, 0, 0, 0.05);
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            z-index: -1;
+            border-radius: 20px;
         }
         
         .dashboard-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
         }
         
         .card-header {
-            padding: 20px 24px;
+            padding: 24px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(248, 253, 249, 0.8);
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
         }
         
         .card-header h3 {
             margin: 0;
             color: #2c3e50;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .card-header i {
+            color: #2e7d32;
+            font-size: 1.4rem;
         }
         
         .route-list {
-            padding: 20px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
             max-height: 400px;
             overflow-y: auto;
         }
@@ -107,7 +120,7 @@ $default_lng = 123.8854;
         .route-item {
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             border-left: 4px solid #4caf50;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -132,7 +145,7 @@ $default_lng = 123.8854;
         .route-item:hover {
             transform: translateX(5px);
             border-color: #4caf50;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
         }
         
         .route-item:hover::before {
@@ -156,9 +169,10 @@ $default_lng = 123.8854;
         
         .route-item h4 {
             color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.05rem;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
             font-weight: 600;
+            line-height: 1.4;
         }
         
         .route-details {
@@ -214,7 +228,7 @@ $default_lng = 123.8854;
         
         .controls-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             padding: 20px;
         }
@@ -232,12 +246,12 @@ $default_lng = 123.8854;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.95rem;
             backdrop-filter: blur(10px);
+            white-space: nowrap;
         }
         
         .btn-primary {
             background: linear-gradient(135deg, #4caf50, #2e7d32);
             color: white;
-            grid-column: span 2;
         }
         
         .btn-primary:hover {
@@ -274,13 +288,13 @@ $default_lng = 123.8854;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            padding: 20px;
+            padding: 24px;
         }
         
         .stat-item {
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             text-align: center;
             border: 1px solid rgba(232, 245, 233, 0.5);
             transition: all 0.3s ease;
@@ -295,7 +309,7 @@ $default_lng = 123.8854;
             font-size: 2rem;
             font-weight: 700;
             color: #2e7d32;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .stat-label {
@@ -307,61 +321,80 @@ $default_lng = 123.8854;
         }
         
         .map-container {
-            background: white;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            height: 600px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            height: 500px;
             position: relative;
             border: 1px solid rgba(0, 0, 0, 0.05);
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
         }
         
         #map {
             width: 100%;
             height: 100%;
-            border-radius: 16px;
+            border-radius: 20px;
         }
         
-        .route-details-content {
-            padding: 20px;
+        .map-actions-container {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
         }
         
-        .detail-item {
+        .route-details-horizontal {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 24px;
+        }
+        
+        .detail-item-horizontal {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 15px;
+            text-align: center;
+            padding: 20px;
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
-            border-radius: 10px;
-            border-left: 4px solid #4caf50;
+            border-radius: 16px;
             border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
         }
         
-        .detail-item i {
-            color: #2e7d32;
-            font-size: 1.2rem;
-            width: 36px;
-            height: 36px;
-            background: rgba(240, 249, 244, 0.8);
-            border-radius: 10px;
+        .detail-item-horizontal:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
+        }
+        
+        .detail-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 16px;
+            color: #2e7d32;
+            font-size: 1.5rem;
         }
         
-        .detail-content h4 {
-            color: #2c3e50;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .detail-content p {
+        .detail-content-horizontal h4 {
             color: #666;
             font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-content-horizontal p {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.4;
         }
         
         .notification-badge {
@@ -406,7 +439,7 @@ $default_lng = 123.8854;
             top: 50px;
             right: 20px;
             width: 350px;
-            border-radius: 16px;
+            border-radius: 20px;
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             display: none;
@@ -541,9 +574,8 @@ $default_lng = 123.8854;
             }
         }
         
-        .route-progress {
-            padding: 20px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        .route-progress-section {
+            margin-top: 30px;
         }
         
         .progress-container {
@@ -625,9 +657,167 @@ $default_lng = 123.8854;
             background: rgba(76, 175, 80, 0.8);
         }
         
+        /* Navbar enhancements - Improved visibility and glow */
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            color: #2e7d32;
+            text-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+        }
+        
+        .logo i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover i {
+            text-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .nav-link {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: #2c3e50;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.4);
+            color: #2c3e50;
+        }
+        
+        .nav-link:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-link:hover i,
+        .nav-link:hover span {
+            color: #2c3e50;
+            text-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
+            filter: drop-shadow(0 0 8px rgba(46, 125, 50, 0.4));
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95), rgba(241, 248, 233, 0.9));
+            border-color: rgba(76, 175, 80, 0.4);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+            color: #2c3e50;
+        }
+        
+        .nav-link.active::before {
+            opacity: 1;
+        }
+        
+        .nav-link.active i,
+        .nav-link.active span {
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(46, 125, 50, 0.4);
+        }
+        
+        .nav-link i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link span {
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+        
+        .user-name {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .user-id {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .btn-logout {
+            background: rgba(248, 253, 249, 0.9);
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            border-radius: 12px;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+        }
+        
+        .btn-logout:hover i {
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
         @media (max-width: 1200px) {
             .map-container {
-                height: 500px;
+                height: 450px;
+            }
+            
+            .map-actions-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .route-details-horizontal {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
@@ -638,10 +828,11 @@ $default_lng = 123.8854;
             
             .controls-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
             }
             
-            .btn-primary {
-                grid-column: span 1;
+            .route-details-horizontal {
+                grid-template-columns: 1fr;
             }
             
             .notification-panel {
@@ -679,6 +870,40 @@ $default_lng = 123.8854;
                 transform: translateX(100%);
                 opacity: 0;
             }
+        }
+        
+        /* Main content enhancements */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 600px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -744,6 +969,7 @@ $default_lng = 123.8854;
                 </div>
                 
                 <div class="dashboard-grid">
+                    <!-- Sidebar with routes and statistics -->
                     <div class="sidebar">
                         <div class="dashboard-card">
                             <div class="card-header">
@@ -762,92 +988,108 @@ $default_lng = 123.8854;
                                 <!-- Stats will be populated by JavaScript -->
                             </div>
                         </div>
-                        
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-cogs"></i> Navigation Controls</h3>
-                            </div>
-                            <div class="controls-grid">
-                                <button class="btn btn-primary" id="startNavigation">
-                                    <i class="fas fa-play-circle"></i> Start Navigation
-                                </button>
-                                <button class="btn btn-secondary" id="pauseNavigation">
-                                    <i class="fas fa-pause-circle"></i> Pause
-                                </button>
-                                <button class="btn btn-outline" id="completeRoute">
-                                    <i class="fas fa-check-circle"></i> Complete
-                                </button>
-                                <button class="btn btn-outline" id="reportIssue">
-                                    <i class="fas fa-exclamation-triangle"></i> Report Issue
-                                </button>
-                            </div>
-                            <div class="route-progress">
-                                <div class="progress-container">
-                                    <div class="progress-label">
-                                        <span>Route Progress</span>
-                                        <span id="progressPercentage">0%</span>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-info-circle"></i> Route Details</h3>
-                            </div>
-                            <div class="route-details-content" id="routeDetails">
-                                <div class="detail-item">
-                                    <i class="fas fa-map-pin"></i>
-                                    <div class="detail-content">
-                                        <h4>Start Point</h4>
-                                        <p id="startPoint">Select a route</p>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-flag-checkered"></i>
-                                    <div class="detail-content">
-                                        <h4>End Point</h4>
-                                        <p id="endPoint">Select a route</p>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-road"></i>
-                                    <div class="detail-content">
-                                        <h4>Distance</h4>
-                                        <p id="routeDistance">-</p>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-clock"></i>
-                                    <div class="detail-content">
-                                        <h4>Estimated Time</h4>
-                                        <p id="routeTime">-</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     
-                    <div class="map-container">
-                        <div id="map"></div>
-                        <div class="notification-badge" id="notificationBadge">3</div>
-                        <div class="notification-panel" id="notificationPanel">
-                            <div class="notification-header">
-                                <h4><i class="fas fa-bell"></i> Notifications</h4>
-                                <button class="close-btn" id="closeNotifications">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                    <!-- Map section with controls below -->
+                    <div class="main-content">
+                        <div class="map-container">
+                            <div id="map"></div>
+                            <div class="notification-badge" id="notificationBadge">3</div>
+                            <div class="notification-panel" id="notificationPanel">
+                                <div class="notification-header">
+                                    <h4><i class="fas fa-bell"></i> Notifications</h4>
+                                    <button class="close-btn" id="closeNotifications">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <!-- Notifications will be added here -->
+                                </div>
                             </div>
-                            <div class="notification-list" id="notificationList">
-                                <!-- Notifications will be added here -->
+                            <div class="live-indicator">
+                                <div class="live-dot"></div>
+                                <span>Live Location Tracking</span>
                             </div>
                         </div>
-                        <div class="live-indicator">
-                            <div class="live-dot"></div>
-                            <span>Live Location Tracking</span>
+                        
+                        <!-- Navigation Controls and Details moved below map -->
+                        <div class="map-actions-container">
+                            <!-- Navigation Controls -->
+                            <div class="dashboard-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-cogs"></i> Navigation Controls</h3>
+                                </div>
+                                <div class="controls-grid">
+                                    <button class="btn btn-primary" id="startNavigation">
+                                        <i class="fas fa-play-circle"></i> Start Navigation
+                                    </button>
+                                    <button class="btn btn-secondary" id="pauseNavigation">
+                                        <i class="fas fa-pause-circle"></i> Pause
+                                    </button>
+                                    <button class="btn btn-outline" id="completeRoute">
+                                        <i class="fas fa-check-circle"></i> Complete
+                                    </button>
+                                    <button class="btn btn-outline" id="reportIssue">
+                                        <i class="fas fa-exclamation-triangle"></i> Report Issue
+                                    </button>
+                                </div>
+                                <div class="route-progress">
+                                    <div class="progress-container">
+                                        <div class="progress-label">
+                                            <span>Route Progress</span>
+                                            <span id="progressPercentage">0%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Horizontal Route Details -->
+                            <div class="dashboard-card">
+                                <div class="card-header">
+                                    <h3><i class="fas fa-info-circle"></i> Route Details</h3>
+                                </div>
+                                <div class="route-details-horizontal" id="routeDetailsHorizontal">
+                                    <div class="detail-item-horizontal">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-map-pin"></i>
+                                        </div>
+                                        <div class="detail-content-horizontal">
+                                            <h4>Start Point</h4>
+                                            <p id="horizontalStartPoint">Select a route</p>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item-horizontal">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-flag-checkered"></i>
+                                        </div>
+                                        <div class="detail-content-horizontal">
+                                            <h4>End Point</h4>
+                                            <p id="horizontalEndPoint">Select a route</p>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item-horizontal">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-road"></i>
+                                        </div>
+                                        <div class="detail-content-horizontal">
+                                            <h4>Distance</h4>
+                                            <p id="horizontalRouteDistance">-</p>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item-horizontal">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="detail-content-horizontal">
+                                            <h4>Estimated Time</h4>
+                                            <p id="horizontalRouteTime">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1117,10 +1359,10 @@ $default_lng = 123.8854;
         
         // Update route details panel
         function updateRouteDetails(route) {
-            document.getElementById('startPoint').textContent = route.start;
-            document.getElementById('endPoint').textContent = route.end;
-            document.getElementById('routeDistance').textContent = route.distance;
-            document.getElementById('routeTime').textContent = route.estimatedTime;
+            document.getElementById('horizontalStartPoint').textContent = route.start;
+            document.getElementById('horizontalEndPoint').textContent = route.end;
+            document.getElementById('horizontalRouteDistance').textContent = route.distance;
+            document.getElementById('horizontalRouteTime').textContent = route.estimatedTime;
         }
         
         // Update progress bar
