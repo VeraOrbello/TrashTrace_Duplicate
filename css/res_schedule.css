@@ -1,121 +1,5 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background-color: #f5f9f7;
-    color: #333;
-}
-
-.dashboard-container {
-    min-height: 100vh;
-}
-
-.dashboard-header {
-    background-color: #4caf7d;
-    color: white;
-    padding: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-nav ul {
-    display: flex;
-    list-style: none;
-    align-items: center;
-}
-
-nav ul li {
-    margin-left: 1.5rem;
-    position: relative;
-}
-
-.nav-link {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-link::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: white;
-    transition: width 0.3s ease;
-}
-
-.nav-link:hover::before {
-    width: 100%;
-}
-
-.nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-link.active::before {
-    width: 100%;
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.btn {
-    display: inline-block;
-    background-color: #4caf7d;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background-color: #3d8b63;
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 2px solid white;
-}
-
-.btn-outline:hover {
-    background-color: white;
-    color: #4caf7d;
-}
+/* Dashboard theme (fonts, base colors, navbar) comes from css/dashboard.css */
+/* Keep schedule-specific styles below */
 
 .schedule-main {
     padding: 2rem 0;
@@ -140,14 +24,27 @@ nav ul li {
     padding: 0 20px;
 }
 
+/* Keep schedule header in normal flow so it pushes the calendar down */
+.schedule-main .container {
+    position: relative;
+}
+
 .schedule-header {
+    position: relative; /* normal flow - no overlap */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem; /* ensure spacing between header and calendar */
+    padding: 0 10px;
     flex-wrap: wrap;
     gap: 1rem;
     animation: slideInLeft 0.6s ease-out;
+    z-index: 2;
+}
+
+/* calendar follows the header naturally */
+.calendar-container {
+    margin-top: 0;
 }
 
 @keyframes slideInLeft {
@@ -173,19 +70,27 @@ nav ul li {
 }
 
 .nav-btn {
-    background-color: #4caf7d;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    background-color: rgba(76, 175, 125, 0.12); /* subtle green tint */
+    color: #2e7d32; /* muted green text */
+    border: 1px solid rgba(46, 125, 50, 0.12);
+    padding: 0.35rem 0.75rem; /* smaller, less prominent */
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: none;
 }
 
 .nav-btn:hover {
-    background-color: #3d8b63;
-    transform: translateY(-2px);
+    background-color: rgba(76, 175, 125, 0.18);
+    transform: none; /* remove lift effect */
+    box-shadow: none;
+}
+
+.nav-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76,175,125,0.12);
 }
 
 #current-month {
@@ -295,20 +200,22 @@ nav ul li {
 
 .schedule-legend {
     display: flex;
-    justify-content: center;
-    gap: 2rem;
+    justify-content: flex-start; /* align to left under header */
+    gap: 1rem;
     flex-wrap: wrap;
-    animation: fadeIn 0.8s ease-out 0.4s both;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.8s ease-out 0.2s both;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.35rem 0.75rem;
     background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    font-size: 0.9rem;
 }
 
 .color-box {
@@ -509,11 +416,6 @@ nav ul li {
     nav ul li {
         margin-left: 0.5rem;
         margin-right: 0.5rem;
-    }
-    
-    .nav-link {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.9rem;
     }
 }
 
