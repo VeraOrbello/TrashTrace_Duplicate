@@ -1,111 +1,32 @@
+/* Profile page styles - fonts/icons are centralized in css/dashboard.css */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
 body {
-    background-color: #f5f9f7;
+    /* GRID BACKGROUND */
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 100vh;
     color: #333;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .profile-container {
     min-height: 100vh;
 }
 
-.profile-header {
-    background-color: #4caf7d;
-    color: white;
-    padding: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
+/* Navbar styling is inherited from dashboard.css - do not override */
 
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-nav ul {
-    display: flex;
-    list-style: none;
-    align-items: center;
-}
-
-nav ul li {
-    margin-left: 1.5rem;
-    position: relative;
-}
-
-.nav-link {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-link::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: white;
-    transition: width 0.3s ease;
-}
-
-.nav-link:hover::before {
-    width: 100%;
-}
-
-.nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-link.active::before {
-    width: 100%;
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.btn {
-    display: inline-block;
-    background-color: #4caf7d;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background-color: #3d8b63;
-}
+/* Button styles inherited from dashboard.css - only override specific variants */
 
 .btn-outline {
     background-color: transparent;
@@ -174,16 +95,31 @@ nav ul li {
 }
 
 .profile-card {
-    background-color: white;
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4caf7d, #81c784, #aed581);
+    opacity: 0.8;
 }
 
 .profile-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
 }
 
 .profile-card h2 {
@@ -252,21 +188,23 @@ textarea {
 }
 
 .btn-primary {
-    background-color: #4caf7d;
+    background: linear-gradient(135deg, #4caf7d, #45a049);
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: all 0.3s ease;
     width: 100%;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 .btn-primary:hover {
-    background-color: #3d8b63;
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .worker-info p {
@@ -281,7 +219,8 @@ textarea {
 
 .benefits h4 {
     margin-bottom: 0.5rem;
-    color: #333;
+    color: #2e7d32;
+    font-weight: 600;
 }
 
 .benefits ul {
@@ -302,26 +241,30 @@ textarea {
     left: 0;
     color: #4caf7d;
     font-weight: bold;
+    font-size: 1rem;
 }
 
 .btn-worker {
-    background-color: #ff9800;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
     color: white;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: all 0.3s ease;
     text-align: center;
-    display: block;
+    display: inline-block;
     text-decoration: none;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+    white-space: nowrap;
 }
 
 .btn-worker:hover {
-    background-color: #f57c00;
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .alert {
@@ -426,18 +369,20 @@ textarea {
 }
 
 .worker-status h3 {
-    color: #333;
+    color: #2e7d32;
     margin-bottom: 1rem;
+    font-weight: 600;
 }
 
 .worker-status p {
-    color: #666;
+    color: #555;
     line-height: 1.6;
     margin-bottom: 1rem;
+    font-weight: 400;
 }
 
 .worker-status.not-applied i {
-    color: #ff9800;
+    color: #4caf7d;
 }
 
 .worker-status.pending i {
@@ -452,6 +397,10 @@ textarea {
     color: #f44336;
 }
 
+.worker-status.reviewing i {
+    color: #2196f3;
+}
+
 .status-details {
     background: #f5f9f7;
     border-radius: 8px;
@@ -463,11 +412,14 @@ textarea {
 .status-details p {
     margin-bottom: 0.5rem;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
 .status-details p strong {
-    color: #333;
+    color: #2e7d32;
+    font-weight: 600;
+    min-width: 120px;
 }
 
 .status-badge {
@@ -495,9 +447,10 @@ textarea {
 
 .status-note {
     font-style: italic;
-    color: #888;
+    color: #666;
     font-size: 0.9rem;
     margin-top: 1rem;
+    font-weight: 400;
 }
 
 .action-buttons {
@@ -508,24 +461,26 @@ textarea {
 }
 
 .btn-schedule {
-    background-color: #2196f3;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: all 0.3s ease;
     text-align: center;
     display: inline-block;
     text-decoration: none;
     flex: 1;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
 .btn-schedule:hover {
-    background-color: #1976d2;
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .worker-info .benefits {
@@ -534,9 +489,11 @@ textarea {
 }
 
 .worker-info .benefits h4 {
-    color: #333;
+    color: #2e7d32;
     margin-bottom: 0.75rem;
     text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 .worker-info .benefits ul {
@@ -546,10 +503,11 @@ textarea {
 
 .worker-info .benefits li {
     padding: 0.5rem 0;
-    color: #666;
+    color: #555;
     position: relative;
     padding-left: 1.8rem;
     text-align: left;
+    font-weight: 400;
 }
 
 .worker-info .benefits li::before {
@@ -561,38 +519,81 @@ textarea {
     font-size: 1.1rem;
 }
 
-.btn-worker {
-    background-color: #4caf7d;
+/* Get Validated button styling */
+.worker-status.not-applied .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(76, 175, 125, 0.2);
+    line-height: 1;
+}
+
+.worker-status.not-applied .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 125, 0.3);
+}
+
+.worker-status.not-applied .btn i {
     color: white;
-    padding: 0.75rem 1.5rem;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+}
+
+.btn-worker {
+    background: linear-gradient(135deg, #4caf7d, #45a049);
+    color: white;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: all 0.3s ease;
     text-align: center;
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     text-decoration: none;
+    box-shadow: 0 2px 8px rgba(76, 175, 125, 0.2);
+    white-space: nowrap;
     margin-top: 1rem;
     width: 100%;
 }
 
 .btn-worker:hover {
-    background-color: #3d8b63;
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 125, 0.3);
+}
+
+.btn-worker i {
+    color: white;
+    font-size: 0.9rem;
 }
 
 .worker-status.approved .btn-worker {
-    background-color: #4caf7d;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+.worker-status.approved .btn-worker:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .worker-status.rejected .btn-worker {
-    background-color: #f44336;
+    background: linear-gradient(135deg, #f44336, #d32f2f);
 }
 
 .worker-status.rejected .btn-worker:hover {
-    background-color: #d32f2f;
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
 }
 
 .worker-status.reviewing i {
