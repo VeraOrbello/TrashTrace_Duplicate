@@ -1,23 +1,181 @@
-.modal{
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.5);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:2000;
+
+
+
+/* Target the specific modal in dashboard */
+#resident-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    backdrop-filter: blur(5px) !important;
+    animation: fadeIn 0.3s ease !important;
+    width: 100vw !important;
+    height: 100vh !important;
 }
-.modal-content{
-    width:100%;
-    max-width:640px;
-    background:#fff;
-    padding:16px;
-    border-radius:8px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.15);
-    position:relative;
+
+/* Ensure modal content is centered */
+#resident-modal .modal-content {
+    margin: auto !important;
+    position: relative !important;
+    z-index: 10000 !important;
 }
-.modal-close{position:absolute;right:12px;top:8px;font-size:22px;cursor:pointer}
-.modal .form-group{margin-bottom:10px}
-.modal label{display:block;margin-bottom:4px;font-weight:600}
-.modal input[type="text"], .modal textarea, .modal select{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
-.modal .btn{margin-right:8px}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 500px;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideIn 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-close {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: none;
+}
+
+.modal-close:hover {
+    background-color: #f5f5f5;
+    color: #f44336;
+    transform: scale(1.1);
+}
+
+.modal h3 {
+    color: #2e7d32;
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-right: 40px;
+}
+
+.modal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.modal input[type="text"],
+.modal textarea,
+.modal select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.modal input[type="text"]:focus,
+.modal textarea:focus,
+.modal select:focus {
+    outline: none;
+    border-color: #4caf7d;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(76, 175, 125, 0.1);
+}
+
+.modal textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal .btn {
+    margin-right: 1rem;
+    margin-top: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.modal .btn-primary {
+    background: linear-gradient(135deg, #4caf7d, #45a049);
+    color: white;
+}
+
+.modal .btn-primary:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 125, 0.3);
+}
+
+.modal .btn-outline {
+    background: transparent;
+    color: #666;
+    border: 2px solid #e0e0e0;
+}
+
+.modal .btn-outline:hover {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+    color: #333;
+}
+
+#form-feedback {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+#form-feedback.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+#form-feedback.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}

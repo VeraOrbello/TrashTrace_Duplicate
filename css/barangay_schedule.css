@@ -2,7 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: inherit; /* inherit Montserrat from dashboard.css */
 }
 
 body {
@@ -14,75 +14,9 @@ body {
     min-height: 100vh;
 }
 
-.dashboard-header {
-    background-color: #4caf7d;
-    color: white;
-    padding: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
+/* Navbar inherited from dashboard.css - no overrides needed */
 
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-nav ul {
-    display: flex;
-    list-style: none;
-    align-items: center;
-}
-
-nav ul li {
-    margin-left: 1.5rem;
-    position: relative;
-}
-
-.nav-link {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-link::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: white;
-    transition: width 0.3s ease;
-}
-
-.nav-link:hover::before {
-    width: 100%;
-}
-
-.nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-link.active::before {
-    width: 100%;
-}
+/* Navbar styling inherited from dashboard.css - do not override */
 
 .user-menu {
     display: flex;
@@ -90,56 +24,12 @@ nav ul li {
     gap: 1rem;
 }
 
-.btn {
-    display: inline-block;
-    background-color: #4caf7d;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background-color: #3d8b63;
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 2px solid white;
-}
-
-.btn-outline:hover {
-    background-color: white;
-    color: #4caf7d;
-}
-
-.btn-action {
-    background-color: #4caf7d;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-action:hover {
-    background-color: #3d8b63;
-    transform: translateY(-2px);
-}
+/* Button styling inherited from dashboard.css - do not override */
 
 .schedule-main {
     padding: 2rem 0;
-    margin-top: 80px;
     animation: fadeInUp 0.6s ease-out;
+    /* margin-top handled by main-offset class */
 }
 
 @keyframes fadeInUp {
@@ -167,6 +57,10 @@ nav ul li {
     flex-wrap: wrap;
     gap: 1rem;
     animation: slideInLeft 0.6s ease-out;
+    background: linear-gradient(135deg, #2e7d32 0%, #4caf7d 100%);
+    padding: 1.25rem 1.75rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.15);
 }
 
 @keyframes slideInLeft {
@@ -181,49 +75,64 @@ nav ul li {
 }
 
 .schedule-header h1 {
-    color: #2e7d32;
-    font-size: 2rem;
+    color: white;
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 700;
 }
 
 .month-navigation {
     display: flex;
     align-items: center;
     gap: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
 }
 
 .nav-btn {
-    background-color: #4caf7d;
+    background-color: rgba(255, 255, 255, 0.2);
     color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.3s ease;
+    font-size: 0.9rem;
 }
 
 .nav-btn:hover {
-    background-color: #3d8b63;
+    background-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 #current-month {
-    color: #2e7d32;
-    min-width: 200px;
+    color: white;
+    min-width: 170px;
     text-align: center;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .barangay-info {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .info-card {
-    background-color: white;
+    background: white;
     border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     border-left: 4px solid #4caf7d;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
 }
 
 .info-card h3 {
@@ -232,6 +141,12 @@ nav ul li {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.info-card h3 i {
+    font-size: 1.1rem;
 }
 
 .info-content {
@@ -241,19 +156,36 @@ nav ul li {
 }
 
 .info-content p {
-    color: #666;
+    color: #555;
+    margin: 0;
+    line-height: 1.6;
+    font-size: 0.9rem;
 }
 
 .info-content strong {
     color: #2e7d32;
+    font-weight: 700;
 }
 
 .worker-controls {
-    background-color: #e8f5e9;
+    background: linear-gradient(135deg, #e8f5e9 0%, #f0f9f4 100%);
     border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid #c8e6c9;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid #4caf7d;
+    position: relative;
+    overflow: hidden;
+}
+
+.worker-controls::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(76, 175, 125, 0.1) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 .worker-controls h3 {
@@ -262,21 +194,57 @@ nav ul li {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+
+.worker-controls h3 i {
+    font-size: 1.1rem;
 }
 
 .controls-buttons {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-action {
+    background: linear-gradient(135deg, #4caf7d, #45a049) !important;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(76, 175, 125, 0.2);
+}
+
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(76, 175, 125, 0.3);
+}
+
+.btn-action:active {
+    transform: translateY(-1px);
 }
 
 .calendar-container {
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
     overflow: hidden;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     animation: fadeIn 0.8s ease-out 0.2s both;
+    border: 1px solid #f0f0f0;
 }
 
 @keyframes fadeIn {
@@ -291,26 +259,29 @@ nav ul li {
 .calendar-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background-color: #4caf7d;
+    background: linear-gradient(135deg, #2e7d32, #4caf7d);
     color: white;
 }
 
 .day-header {
-    padding: 1rem;
+    padding: 0.9rem 0.75rem;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .calendar-body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background-color: #e0e0e0;
+    background-color: #e8e8e8;
 }
 
 .calendar-day {
     background-color: white;
-    min-height: 100px;
+    min-height: 90px;
     padding: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -318,94 +289,109 @@ nav ul li {
 }
 
 .calendar-day:hover {
-    background-color: #f5f5f5;
+    background-color: #f8f8f8;
     transform: scale(1.02);
     z-index: 1;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(76, 175, 125, 0.15);
 }
 
 .calendar-day.other-month {
-    color: #ccc;
-    background-color: #f9f9f9;
+    color: #ddd;
+    background-color: #fafafa;
 }
 
 .calendar-day.has-schedule {
-    border-left: 3px solid #4caf7d;
+    border-left: 4px solid #4caf7d;
+    background: linear-gradient(135deg, rgba(76, 175, 125, 0.02) 0%, rgba(76, 175, 125, 0.05) 100%);
 }
 
 .day-number {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    color: #333;
 }
 
 .schedule-indicator {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 3px;
     color: white;
     margin-bottom: 0.2rem;
     display: inline-block;
     transition: transform 0.2s ease;
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 
 .schedule-indicator.scheduled {
-    background-color: #4caf7d;
+    background: linear-gradient(135deg, #4caf7d, #45a049);
 }
 
 .schedule-indicator.completed {
-    background-color: #2196f3;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
 }
 
 .schedule-indicator.delayed {
-    background-color: #ff9800;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
 }
 
 .schedule-indicator.cancelled {
-    background-color: #f44336;
+    background: linear-gradient(135deg, #f44336, #d32f2f);
 }
 
 .schedule-indicator.multiple {
-    background-color: #9c27b0;
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
 }
 
 .schedule-legend {
     display: flex;
     justify-content: center;
-    gap: 2rem;
+    gap: 1rem;
     flex-wrap: wrap;
     animation: fadeIn 0.8s ease-out 0.4s both;
+    margin-bottom: 1.5rem;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 0.5rem 0.85rem;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.legend-item:hover {
+    box-shadow: 0 4px 12px rgba(76, 175, 125, 0.1);
+    transform: translateY(-2px);
 }
 
 .color-box {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 3px;
 }
 
 .color-box.scheduled {
-    background-color: #4caf7d;
+    background: linear-gradient(135deg, #4caf7d, #45a049);
 }
 
 .color-box.completed {
-    background-color: #2196f3;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
 }
 
 .color-box.delayed {
-    background-color: #ff9800;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
 }
 
 .color-box.cancelled {
-    background-color: #f44336;
+    background: linear-gradient(135deg, #f44336, #d32f2f);
 }
 
 .color-box.multiple {
