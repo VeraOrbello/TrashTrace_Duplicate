@@ -106,212 +106,1074 @@ if (isset($link) && $link !== null) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Driver Dashboard - TrashTrace</title>
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Consolidated CSS -->
     <link rel="stylesheet" href="css/driver/master-styles.css">
-    <link rel="stylesheet" href="css/driver/dashboard.css">
-   
     
- 
+    <style>
+        /* Dashboard Grid Layout - Matching routes.php */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            z-index: -1;
+            border-radius: 20px;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .card-header i {
+            color: #2e7d32;
+            font-size: 1.4rem;
+        }
+        
+        /* Stats Cards - Matching routes.php style */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 24px;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        /* Dashboard Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .content-card {
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-size: 1.5rem;
+        }
+        
+        .content-card h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .content-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: fit-content;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+            background: linear-gradient(135deg, #43a047, #1b5e20);
+        }
+        
+        /* Quick Actions */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 24px;
+        }
+        
+        @media (max-width: 1200px) {
+            .quick-actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .action-item {
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .action-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
+            border-color: #4caf50;
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.9), rgba(241, 248, 233, 0.8));
+        }
+        
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: #2e7d32;
+            font-size: 1.3rem;
+        }
+        
+        .action-item h4 {
+            color: #2c3e50;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .action-item p {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        /* Welcome Section */
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        
+        /* Status Indicator */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.6s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(232, 245, 233, 0.5);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-text {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
+        }
+        
+        /* Notifications - Matching routes.php */
+        .notification-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            animation: pulse 2s infinite;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification-panel {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            width: 350px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .notification-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .notification-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .notification-item {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: rgba(248, 253, 249, 0.8);
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification-item:hover {
+            background: rgba(240, 255, 244, 0.9);
+            transform: translateX(5px);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .notification-item.unread {
+            background: rgba(232, 245, 233, 0.9);
+            border-left: 4px solid #4caf50;
+        }
+        
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .activity-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2e7d32;
+            font-size: 1.1rem;
+        }
+        
+        .activity-content h4 {
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .activity-content p {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        
+        /* Custom scrollbar */
+        .activity-list::-webkit-scrollbar,
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-list::-webkit-scrollbar-track,
+        .notification-list::-webkit-scrollbar-track {
+            background: rgba(241, 241, 241, 0.5);
+            border-radius: 10px;
+        }
+        
+        .activity-list::-webkit-scrollbar-thumb,
+        .notification-list::-webkit-scrollbar-thumb {
+            background: rgba(200, 230, 201, 0.8);
+            border-radius: 10px;
+        }
+        
+        .activity-list::-webkit-scrollbar-thumb:hover,
+        .notification-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        /* ========== EXACT ROUTES.PHP NAVBAR STYLES ========== */
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            color: #2e7d32;
+            text-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+        }
+        
+        .logo i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover i {
+            text-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .nav-link {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: #2c3e50;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.4);
+            color: #2c3e50;
+        }
+        
+        .nav-link:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-link:hover i,
+        .nav-link:hover span {
+            color: #2c3e50;
+            text-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
+            filter: drop-shadow(0 0 8px rgba(46, 125, 50, 0.4));
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95), rgba(241, 248, 233, 0.9));
+            border-color: rgba(76, 175, 80, 0.4);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+            color: #2c3e50;
+        }
+        
+        .nav-link.active::before {
+            opacity: 1;
+        }
+        
+        .nav-link.active i,
+        .nav-link.active span {
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(46, 125, 50, 0.4);
+        }
+        
+        .nav-link i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link span {
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+        
+        .user-name {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .user-id {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .btn-logout {
+            background: rgba(248, 253, 249, 0.9);
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            border-radius: 12px;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+        }
+        
+        .btn-logout:hover i {
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Main content enhancements */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Grid Background -->
-    <div class="grid-background"></div>
-    
     <div class="dashboard-container">
+        <!-- Header Section - EXACT SAME as routes.php -->
         <header class="dashboard-header">
+            <!-- Grid Background Pattern -->
+            <div class="grid-background-nav"></div>
+            
             <div class="header-content">
-                <div class="logo">
+                <a href="driver_dashboard.php" class="logo">
                     <i class="fas fa-recycle"></i>
-                    TrashTrace Driver
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="driver_dashboard.php" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                        <li><a href="driver/assignments.php" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
-                        <li><a href="driver/routes.php" class="nav-link"><i class="fas fa-route"></i> Routes</a></li>
-                        <li><a href="driver/collections.php" class="nav-link"><i class="fas fa-trash-restore"></i> Collections</a></li>
-                        <li><a href="driver/earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> Earnings</a></li>
-                        <li class="user-menu">
-                            <span class="user-greeting"><i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($driver_name); ?></span>
-                            <a href="logout.php" class="btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                        </li>
-                    </ul>
+                    <span>Trash<span style="font-weight: 700;">Trace</span></span>
+                </a>
+                
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav id="mainNav">
+                    <div class="nav-container">
+                        <ul>
+                            <li><a href="driver_dashboard.php" class="nav-link active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                            <li><a href="driver/assignments.php" class="nav-link"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+                            <li><a href="driver/routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
+                            <li><a href="driver/collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
+                            <li><a href="driver/earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                            <li><a href="driver/history.php" class="nav-link"><i class="fas fa-history"></i> <span>History</span></a></li>
+                            <li><a href="driver/profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                        </ul>
+                    </div>
                 </nav>
+                
+                <div class="user-menu">
+                    <div class="user-info" onclick="window.location.href='driver/profile.php'">
+                        <div class="user-avatar">
+                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
+                            <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
+                        </div>
+                    </div>
+                    <a href="logout.php" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
             </div>
         </header>
-
+        
         <main class="dashboard-main">
-            <div class="welcome-section">
-                <h1 class="welcome-title">
-                    <i class="fas fa-truck"></i>
-                    Welcome Back, <?php echo htmlspecialchars(explode(' ', $driver_name)[0]); ?>!
-                </h1>
-                <p class="welcome-subtitle">Here's what's happening with your collections today</p>
-            </div>
+            <!-- Grid Background Pattern -->
+            <div class="grid-background"></div>
+            
+            <div class="container">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-truck"></i>
+                        <?php
+                        $hour = date('H');
+                        $greeting = '';
+                        if ($hour < 12) {
+                            $greeting = 'Good Morning';
+                        } elseif ($hour < 18) {
+                            $greeting = 'Good Afternoon';
+                        } else {
+                            $greeting = 'Good Evening';
+                        }
+                        echo $greeting . ', ' . htmlspecialchars(explode(' ', $driver_name)[0]) . '!';
+                        ?>
+                    </h1>
+                    <p class="page-subtitle">Here's what's happening with your collections today</p>
+                </div>
 
-            <!-- Statistics Cards -->
-            <div class="dashboard-stats">
-                <div class="stat-card" style="--order: 1;">
-                    <div class="stat-icon assignments">
-                        <i class="fas fa-clipboard-list"></i>
+                <!-- Dashboard Grid - Matching routes.php layout -->
+                <div class="dashboard-grid">
+                    <!-- Sidebar with stats and notifications -->
+                    <div class="sidebar">
+                        <!-- Statistics Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-line"></i> Today's Statistics</h3>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value"><?php echo $stats['today_assignments']; ?></div>
+                                    <div class="stat-label">Assignments</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><?php echo $stats['active_routes']; ?></div>
+                                    <div class="stat-label">Active Routes</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><?php echo $stats['monthly_collections']; ?></div>
+                                    <div class="stat-label">Collections</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">₱<?php echo number_format($stats['monthly_earnings'], 0); ?></div>
+                                    <div class="stat-label">Earnings</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notifications Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bell"></i> Recent Activity</h3>
+                            </div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>Route Completed</h4>
+                                        <p>Barangay Lahug Morning Route</p>
+                                    </div>
+                                    <div class="activity-time">10:30 AM</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>New Assignment</h4>
+                                        <p>IT Park Collection Route</p>
+                                    </div>
+                                    <div class="activity-time">9:15 AM</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>Earnings Updated</h4>
+                                        <p>₱1,250 added to your account</p>
+                                    </div>
+                                    <div class="activity-time">Yesterday</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>Schedule Updated</h4>
+                                        <p>New route for tomorrow</p>
+                                    </div>
+                                    <div class="activity-time">2 days ago</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value"><?php echo $stats['today_assignments']; ?></div>
-                        <div class="stat-label">Today's Assignments</div>
+                    
+                    <!-- Main Content Area -->
+                    <div class="main-content">
+                        <!-- Quick Actions -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                            </div>
+                            <div class="quick-actions-grid">
+                                <a href="driver/assignments.php" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <h4>View Assignments</h4>
+                                    <p>Check today's pickup tasks</p>
+                                </a>
+                                <a href="driver/routes.php" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-route"></i>
+                                    </div>
+                                    <h4>Plan Route</h4>
+                                    <p>Optimize your collection path</p>
+                                </a>
+                                <a href="driver/collections.php?action=log" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-trash-restore"></i>
+                                    </div>
+                                    <h4>Log Collection</h4>
+                                    <p>Record completed pickups</p>
+                                </a>
+                                <a href="driver/earnings.php" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h4>Track Earnings</h4>
+                                    <p>View your performance</p>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Dashboard Content Grid -->
+                        <div class="content-grid">
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-tasks"></i>
+                                    </div>
+                                    <h3>Today's Assignments</h3>
+                                    <p>Check your pickup assignments for today. View locations, times, and completion status.</p>
+                                    <a href="driver/assignments.php" class="btn-primary">
+                                        <i class="fas fa-eye"></i> View Assignments
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-route"></i>
+                                    </div>
+                                    <h3>My Routes</h3>
+                                    <p>View your assigned collection routes with optimized paths and navigation assistance.</p>
+                                    <a href="driver/routes.php" class="btn-primary">
+                                        <i class="fas fa-map"></i> View Routes
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-trash-restore"></i>
+                                    </div>
+                                    <h3>Collections</h3>
+                                    <p>Log your daily collections, track progress, and update completion status in real-time.</p>
+                                    <a href="driver/collections.php" class="btn-primary">
+                                        <i class="fas fa-plus-circle"></i> Log Collections
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <h3>Earnings</h3>
+                                    <p>Track your earnings, view payment history, and monitor your financial performance.</p>
+                                    <a href="driver/earnings.php" class="btn-primary">
+                                        <i class="fas fa-chart-line"></i> View Earnings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Indicator -->
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <div class="status-text">You are currently active and ready for assignments</div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="stat-card" style="--order: 2;">
-                    <div class="stat-icon routes">
-                        <i class="fas fa-map-marked-alt"></i>
+                <!-- Notification Badge and Panel -->
+                <div class="notification-badge" id="notificationBadge">3</div>
+                <div class="notification-panel" id="notificationPanel">
+                    <div class="notification-header">
+                        <h4><i class="fas fa-bell"></i> Notifications</h4>
+                        <button class="close-btn" id="closeNotifications">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value"><?php echo $stats['active_routes']; ?></div>
-                        <div class="stat-label">Active Routes</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card" style="--order: 3;">
-                    <div class="stat-icon collections">
-                        <i class="fas fa-trash-alt"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value"><?php echo $stats['monthly_collections']; ?></div>
-                        <div class="stat-label">Monthly Collections</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card" style="--order: 4;">
-                    <div class="stat-icon earnings">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">₱<?php echo number_format($stats['monthly_earnings'], 2); ?></div>
-                        <div class="stat-label">Monthly Earnings</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Dashboard Grid -->
-            <div class="dashboard-grid">
-                <div class="dashboard-card" style="--order: 1;">
-                    <div class="card-icon">
-                        <i class="fas fa-tasks"></i>
-                    </div>
-                    <h2>Today's Assignments</h2>
-                    <div class="card-content">
-                        <p>Check your pickup assignments for today. View locations, times, and completion status.</p>
-                        <a href="driver/assignments.php" class="btn-primary">
-                            <i class="fas fa-eye"></i> View Assignments
-                        </a>
+                    <div class="notification-list" id="notificationList">
+                        <div class="notification-item unread">
+                            <h4>New Route Assigned</h4>
+                            <p>You have been assigned to Barangay Lahug route</p>
+                            <small>10:30 AM</small>
+                        </div>
+                        <div class="notification-item unread">
+                            <h4>Collection Reminder</h4>
+                            <p>Complete IT Park route by 5:00 PM today</p>
+                            <small>9:15 AM</small>
+                        </div>
+                        <div class="notification-item">
+                            <h4>System Update</h4>
+                            <p>New features added to the driver dashboard</p>
+                            <small>Yesterday</small>
+                        </div>
+                        <div class="notification-item">
+                            <h4>Earnings Update</h4>
+                            <p>Your weekly earnings have been calculated</p>
+                            <small>2 days ago</small>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="dashboard-card" style="--order: 2;">
-                    <div class="card-icon">
-                        <i class="fas fa-route"></i>
-                    </div>
-                    <h2>My Routes</h2>
-                    <div class="card-content">
-                        <p>View your assigned collection routes with optimized paths and navigation assistance.</p>
-                        <a href="driver/routes.php" class="btn-primary">
-                            <i class="fas fa-map"></i> View Routes
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="dashboard-card" style="--order: 3;">
-                    <div class="card-icon">
-                        <i class="fas fa-trash-restore"></i>
-                    </div>
-                    <h2>Collections</h2>
-                    <div class="card-content">
-                        <p>Log your daily collections, track progress, and update completion status in real-time.</p>
-                        <a href="driver/collections.php" class="btn-primary">
-                            <i class="fas fa-plus-circle"></i> Log Collections
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="dashboard-card" style="--order: 4;">
-                    <div class="card-icon">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <h2>Earnings</h2>
-                    <div class="card-content">
-                        <p>Track your earnings, view payment history, and monitor your financial performance.</p>
-                        <a href="driver/earnings.php" class="btn-primary">
-                            <i class="fas fa-chart-line"></i> View Earnings
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                <div class="action-buttons">
-                    <a href="driver/collections.php?action=log" class="action-btn">
-                        <i class="fas fa-plus"></i> Log New Collection
-                    </a>
-                    <a href="driver/assignments.php?filter=today" class="action-btn">
-                        <i class="fas fa-calendar-day"></i> Today's Schedule
-                    </a>
-                    <a href="driver/routes.php?view=map" class="action-btn">
-                        <i class="fas fa-map-marked-alt"></i> View Route Map
-                    </a>
-                    <a href="driver/earnings.php?period=current" class="action-btn">
-                        <i class="fas fa-wallet"></i> Check Earnings
-                    </a>
-                </div>
-            </div>
-
-            <!-- Status Indicator -->
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <div class="status-text">You are currently active and ready for assignments</div>
             </div>
         </main>
     </div>
 
     <script>
-        // Add smooth animations on scroll
         document.addEventListener('DOMContentLoaded', function() {
-            // Animate cards on load with staggered delay
-            const cards = document.querySelectorAll('.dashboard-card, .stat-card');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mainNav = document.getElementById('mainNav');
+            
+            if (mobileMenuToggle && mainNav) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    const navContainer = mainNav.querySelector('.nav-container');
+                    if (navContainer) {
+                        navContainer.style.display = navContainer.style.display === 'flex' ? 'none' : 'flex';
+                    }
+                });
+            }
+            
+            // Notification handling
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const closeNotifications = document.getElementById('closeNotifications');
+            
+            if (notificationBadge && notificationPanel) {
+                notificationBadge.addEventListener('click', function() {
+                    notificationPanel.style.display = notificationPanel.style.display === 'block' ? 'none' : 'block';
+                    
+                    // Mark all as read when opening
+                    const unreadItems = notificationPanel.querySelectorAll('.notification-item.unread');
+                    unreadItems.forEach(item => {
+                        item.classList.remove('unread');
+                    });
+                    
+                    // Update badge count
+                    notificationBadge.textContent = '0';
+                    notificationBadge.style.display = 'none';
+                });
+            }
+            
+            if (closeNotifications && notificationPanel) {
+                closeNotifications.addEventListener('click', function() {
+                    notificationPanel.style.display = 'none';
+                });
+            }
+            
+            // Close notification panel when clicking outside
+            document.addEventListener('click', function(event) {
+                if (notificationPanel && notificationPanel.style.display === 'block') {
+                    if (!notificationPanel.contains(event.target) && event.target !== notificationBadge) {
+                        notificationPanel.style.display = 'none';
+                    }
+                }
             });
             
-            // Add hover effect for cards
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.dashboard-card, .stat-item, .action-item');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', () => {
-                    card.style.transform = 'translateY(-8px)';
+                    if (card.classList.contains('dashboard-card')) {
+                        card.style.transform = 'translateY(-5px)';
+                    } else if (card.classList.contains('stat-item')) {
+                        card.style.transform = 'translateY(-3px)';
+                    } else if (card.classList.contains('action-item')) {
+                        card.style.transform = 'translateY(-3px)';
+                    }
                 });
                 
                 card.addEventListener('mouseleave', () => {
-                    card.style.transform = 'translateY(0)';
+                    if (card.classList.contains('dashboard-card')) {
+                        card.style.transform = 'translateY(0)';
+                    } else if (card.classList.contains('stat-item')) {
+                        card.style.transform = 'translateY(0)';
+                    } else if (card.classList.contains('action-item')) {
+                        card.style.transform = 'translateY(0)';
+                    }
                 });
             });
             
-            // Update greeting based on time of day
-            const greeting = document.querySelector('.welcome-title');
-            const hour = new Date().getHours();
-            let timeGreeting = 'Good ';
+            // Responsive navigation
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    if (mainNav) {
+                        const navContainer = mainNav.querySelector('.nav-container');
+                        if (navContainer) navContainer.style.display = 'flex';
+                    }
+                } else {
+                    if (mainNav) {
+                        const navContainer = mainNav.querySelector('.nav-container');
+                        if (navContainer) navContainer.style.display = 'none';
+                    }
+                }
+            }
             
-            if (hour < 12) timeGreeting = 'Good Morning';
-            else if (hour < 18) timeGreeting = 'Good Afternoon';
-            else timeGreeting = 'Good Evening';
+            // Initial check
+            handleResize();
             
-            // Update only the first part of the title
-            const titleText = greeting.innerHTML;
-            greeting.innerHTML = titleText.replace('Welcome Back', timeGreeting);
+            // Listen for resize events
+            window.addEventListener('resize', handleResize);
+            
+            // Add animation to cards on load
+            const statCards = document.querySelectorAll('.stat-item');
+            statCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease';
+            });
         });
     </script>
 </body>
