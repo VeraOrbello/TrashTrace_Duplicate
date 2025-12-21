@@ -108,7 +108,7 @@ if (isset($link) && $link !== null) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - TrashTrace</title>
+    <title>Driver Dashboard - TrashTrace</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -117,48 +117,7 @@ if (isset($link) && $link !== null) {
     <link rel="stylesheet" href="css/driver/master-styles.css">
     
     <style>
-        /* Resident Dashboard Specific Styles */
-        .resident-dashboard-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        .grid-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(76, 175, 80, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(76, 175, 80, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
-            opacity: 0.5;
-        }
-        
-        .page-header {
-            margin-bottom: 30px;
-        }
-        
-        .page-title {
-            color: #2c3e50;
-            margin-bottom: 8px;
-            font-size: 2.2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .page-subtitle {
-            color: #666;
-            font-size: 1.1rem;
-            max-width: 600px;
-            line-height: 1.5;
-        }
-        
+        /* Dashboard Grid Layout - Matching routes.php */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 400px 1fr;
@@ -210,7 +169,7 @@ if (isset($link) && $link !== null) {
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
         }
         
-        .card-header h2, .card-header h3 {
+        .card-header h3 {
             margin: 0;
             color: #2c3e50;
             font-size: 1.3rem;
@@ -225,32 +184,614 @@ if (isset($link) && $link !== null) {
             font-size: 1.4rem;
         }
         
-        .card-content {
+        /* Stats Cards - Matching routes.php style */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             padding: 24px;
         }
         
-        .welcome-title {
-            color: #2c3e50;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .stat-item {
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
         }
         
-        .welcome-subtitle {
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        /* Dashboard Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .content-card {
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-size: 1.5rem;
+        }
+        
+        .content-card h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .content-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: fit-content;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+            background: linear-gradient(135deg, #43a047, #1b5e20);
+        }
+        
+        /* Quick Actions */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 24px;
+        }
+        
+        @media (max-width: 1200px) {
+            .quick-actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .action-item {
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .action-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
+            border-color: #4caf50;
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.9), rgba(241, 248, 233, 0.8));
+        }
+        
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: #2e7d32;
+            font-size: 1.3rem;
+        }
+        
+        .action-item h4 {
+            color: #2c3e50;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .action-item p {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        /* Welcome Section */
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-subtitle {
             color: #666;
             font-size: 1.1rem;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        
+        /* Status Indicator */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.6s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(232, 245, 233, 0.5);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-text {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
+        }
+        
+        /* Notifications - Matching routes.php */
+        .notification-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            animation: pulse 2s infinite;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification-panel {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            width: 350px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .notification-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .notification-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .notification-item {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: rgba(248, 253, 249, 0.8);
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification-item:hover {
+            background: rgba(240, 255, 244, 0.9);
+            transform: translateX(5px);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .notification-item.unread {
+            background: rgba(232, 245, 233, 0.9);
+            border-left: 4px solid #4caf50;
+        }
+        
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .activity-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2e7d32;
+            font-size: 1.1rem;
+        }
+        
+        .activity-content h4 {
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .activity-content p {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        
+        /* Custom scrollbar */
+        .activity-list::-webkit-scrollbar,
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-list::-webkit-scrollbar-track,
+        .notification-list::-webkit-scrollbar-track {
+            background: rgba(241, 241, 241, 0.5);
+            border-radius: 10px;
+        }
+        
+        .activity-list::-webkit-scrollbar-thumb,
+        .notification-list::-webkit-scrollbar-thumb {
+            background: rgba(200, 230, 201, 0.8);
+            border-radius: 10px;
+        }
+        
+        .activity-list::-webkit-scrollbar-thumb:hover,
+        .notification-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        /* ========== EXACT ROUTES.PHP NAVBAR STYLES ========== */
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            color: #2e7d32;
+            text-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+        }
+        
+        .logo i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover i {
+            text-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .nav-link {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: #2c3e50;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.4);
+            color: #2c3e50;
+        }
+        
+        .nav-link:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-link:hover i,
+        .nav-link:hover span {
+            color: #2c3e50;
+            text-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
+            filter: drop-shadow(0 0 8px rgba(46, 125, 50, 0.4));
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95), rgba(241, 248, 233, 0.9));
+            border-color: rgba(76, 175, 80, 0.4);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+            color: #2c3e50;
+        }
+        
+        .nav-link.active::before {
+            opacity: 1;
+        }
+        
+        .nav-link.active i,
+        .nav-link.active span {
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(46, 125, 50, 0.4);
+        }
+        
+        .nav-link i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link span {
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+        
+        .user-name {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .user-id {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .btn-logout {
+            background: rgba(248, 253, 249, 0.9);
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            border-radius: 12px;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+        }
+        
+        .btn-logout:hover i {
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Main content enhancements */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Header Section - Matching routes.php style -->
+        <!-- Header Section - EXACT SAME as routes.php -->
         <header class="dashboard-header">
             <!-- Grid Background Pattern -->
             <div class="grid-background-nav"></div>
             
             <div class="header-content">
-                <a href="dashboard.php" class="logo">
+                <a href="driver_dashboard.php" class="logo">
                     <i class="fas fa-recycle"></i>
                     <span>Trash<span style="font-weight: 700;">Trace</span></span>
                 </a>
@@ -262,22 +803,25 @@ if (isset($link) && $link !== null) {
                 <nav id="mainNav">
                     <div class="nav-container">
                         <ul>
-                            <li><a href="dashboard.php" class="nav-link active"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
-                            <li><a href="res_schedule.php" class="nav-link"><i class="fas fa-calendar"></i> <span>Schedule</span></a></li>
-                            <li><a href="res_notif.php" class="nav-link"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
-                            <li><a href="res_profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                            <li><a href="driver_dashboard.php" class="nav-link active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                            <li><a href="driver/assignments.php" class="nav-link"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+                            <li><a href="driver/routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
+                            <li><a href="driver/collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
+                            <li><a href="driver/earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
+                            <li><a href="driver/history.php" class="nav-link"><i class="fas fa-history"></i> <span>History</span></a></li>
+                            <li><a href="driver/profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
                         </ul>
                     </div>
                 </nav>
                 
                 <div class="user-menu">
-                    <div class="user-info" onclick="window.location.href='res_profile.php'">
+                    <div class="user-info" onclick="window.location.href='driver/profile.php'">
                         <div class="user-avatar">
-                            <?php echo strtoupper(substr($user_name, 0, 1)); ?>
+                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
                         </div>
                         <div class="user-details">
-                            <span class="user-name"><?php echo htmlspecialchars($user_name); ?></span>
-                            <span class="user-id">Resident</span>
+                            <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
+                            <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
                         </div>
                     </div>
                     <a href="logout.php" class="btn-logout">
@@ -294,139 +838,233 @@ if (isset($link) && $link !== null) {
             <div class="container">
                 <div class="page-header">
                     <h1 class="page-title">
-                        <i class="fas fa-home"></i>
-                        Welcome back, <?php echo htmlspecialchars($user_name); ?>
+                        <i class="fas fa-truck"></i>
+                        <?php
+                        $hour = date('H');
+                        $greeting = '';
+                        if ($hour < 12) {
+                            $greeting = 'Good Morning';
+                        } elseif ($hour < 18) {
+                            $greeting = 'Good Afternoon';
+                        } else {
+                            $greeting = 'Good Evening';
+                        }
+                        echo $greeting . ', ' . htmlspecialchars(explode(' ', $driver_name)[0]) . '!';
+                        ?>
                     </h1>
-                    <p class="page-subtitle">Stay updated with your waste collection schedule and notifications.</p>
+                    <p class="page-subtitle">Here's what's happening with your collections today</p>
                 </div>
 
-                <!-- Dashboard Grid -->
+                <!-- Dashboard Grid - Matching routes.php layout -->
                 <div class="dashboard-grid">
-                    <!-- Sidebar with upcoming pickup -->
+                    <!-- Sidebar with stats and notifications -->
                     <div class="sidebar">
-                        <!-- Upcoming Pickup Card -->
+                        <!-- Statistics Card -->
                         <div class="dashboard-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-truck"></i> Upcoming Pickup</h3>
+                                <h3><i class="fas fa-chart-line"></i> Today's Statistics</h3>
                             </div>
-                            <div class="card-content">
-                                <?php if($upcoming_pickup): ?>
-                                    <div class="pickup-info">
-                                        <div class="pickup-date">
-                                            <h3>Next Pickup</h3>
-                                            <p class="date"><?php echo date('l, F j', strtotime($upcoming_pickup['schedule_date'])); ?></p>
-                                            <p class="waste-type">Waste Type: Mixed Waste</p>
-                                        </div>
-                                        <a href="res_schedule.php" class="view-details">
-                                            <i class="fas fa-eye"></i> View Details
-                                        </a>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="pickup-info">
-                                        <div class="pickup-date">
-                                            <h3>No Upcoming Pickups</h3>
-                                            <p class="date">Check schedule for updates</p>
-                                        </div>
-                                        <a href="res_schedule.php" class="view-details">
-                                            <i class="fas fa-calendar"></i> View Schedule
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value"><?php echo $stats['today_assignments']; ?></div>
+                                    <div class="stat-label">Assignments</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><?php echo $stats['active_routes']; ?></div>
+                                    <div class="stat-label">Active Routes</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value"><?php echo $stats['monthly_collections']; ?></div>
+                                    <div class="stat-label">Collections</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">₱<?php echo number_format($stats['monthly_earnings'], 0); ?></div>
+                                    <div class="stat-label">Earnings</div>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Pickup Status Card -->
+                        <!-- Notifications Card -->
                         <div class="dashboard-card">
                             <div class="card-header">
-                                <h3><i class="fas fa-chart-line"></i> Pickup Status</h3>
+                                <h3><i class="fas fa-bell"></i> Recent Activity</h3>
                             </div>
-                            <div class="card-content">
-                                <p><?php echo $pickup_status; ?></p>
-                                <?php if($upcoming_pickup): ?>
-                                <div class="progress-container">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: <?php echo $progress_percentage; ?>%"></div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-check-circle"></i>
                                     </div>
-                                    <span class="progress-text">Truck is <?php echo $progress_percentage; ?>% along the route.</span>
+                                    <div class="activity-content">
+                                        <h4>Route Completed</h4>
+                                        <p>Barangay Lahug Morning Route</p>
+                                    </div>
+                                    <div class="activity-time">10:30 AM</div>
                                 </div>
-                                <?php endif; ?>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>New Assignment</h4>
+                                        <p>IT Park Collection Route</p>
+                                    </div>
+                                    <div class="activity-time">9:15 AM</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>Earnings Updated</h4>
+                                        <p>₱1,250 added to your account</p>
+                                    </div>
+                                    <div class="activity-time">Yesterday</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>Schedule Updated</h4>
+                                        <p>New route for tomorrow</p>
+                                    </div>
+                                    <div class="activity-time">2 days ago</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Main Content Area -->
                     <div class="main-content">
-                        <!-- Notifications Card -->
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <h3><i class="fas fa-bell"></i> Recent Notifications</h3>
-                            </div>
-                            <div class="card-content">
-                                <div class="notification-list" id="notificationList">
-                                    <?php if(!empty($notifications)): ?>
-                                        <?php foreach($notifications as $notification): ?>
-                                        <div class="notification-item <?php echo (isset($notification['is_read']) && $notification['is_read'] == 0) ? 'unread' : ''; ?>" 
-                                             data-id="<?php echo $notification['id'] ?? ''; ?>">
-                                            <div class="notification-icon">
-                                                <?php
-                                                $icon = '📢';
-                                                if(isset($notification['type'])) {
-                                                    switch($notification['type']) {
-                                                        case 'pickup_scheduled': $icon = '📅'; break;
-                                                        case 'pickup_completed': $icon = '✅'; break;
-                                                        case 'pickup_delayed': $icon = '⚠️'; break;
-                                                        case 'pickup_cancelled': $icon = '❌'; break;
-                                                        case 'emergency': $icon = '🚨'; break;
-                                                        default: $icon = '📢';
-                                                    }
-                                                }
-                                                echo $icon;
-                                                ?>
-                                            </div>
-                                            <div class="notification-content">
-                                                <h4><?php echo htmlspecialchars($notification['title']); ?></h4>
-                                                <p><?php echo htmlspecialchars($notification['message']); ?></p>
-                                                <small><?php echo date('F j, Y, g:i A', strtotime($notification['created_at'])); ?></small>
-                                            </div>
-                                        </div>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <div class="no-notifications">
-                                            <p>No notifications from the past week.</p>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <a href="res_notif.php" class="view-all">
-                                    <i class="fas fa-list"></i> View All Notifications
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <!-- Actions Card -->
+                        <!-- Quick Actions -->
                         <div class="dashboard-card">
                             <div class="card-header">
                                 <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
                             </div>
-                            <div class="card-content">
-                                <div class="action-buttons">
-                                    <button id="report-missed-btn" class="resident-action-btn">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>Report Missed Pickup</span>
-                                    </button>
-                                    <button id="track-complaint-btn" class="resident-action-btn">
-                                        <i class="fas fa-search"></i>
-                                        <span>Track Complaint Status</span>
-                                    </button>
-                                    <button id="feedback-btn" class="resident-action-btn">
-                                        <i class="fas fa-comment"></i>
-                                        <span>Submit Feedback</span>
-                                    </button>
-                                    <a href="barangay_register.php" class="resident-action-btn">
-                                        <i class="fas fa-file-alt"></i>
-                                        <span>Application Status</span>
+                            <div class="quick-actions-grid">
+                                <a href="driver/assignments.php" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <h4>View Assignments</h4>
+                                    <p>Check today's pickup tasks</p>
+                                </a>
+                                <a href="driver/routes.php" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-route"></i>
+                                    </div>
+                                    <h4>Plan Route</h4>
+                                    <p>Optimize your collection path</p>
+                                </a>
+                                <a href="driver/collections.php?action=log" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-trash-restore"></i>
+                                    </div>
+                                    <h4>Log Collection</h4>
+                                    <p>Record completed pickups</p>
+                                </a>
+                                <a href="driver/earnings.php" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h4>Track Earnings</h4>
+                                    <p>View your performance</p>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Dashboard Content Grid -->
+                        <div class="content-grid">
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-tasks"></i>
+                                    </div>
+                                    <h3>Today's Assignments</h3>
+                                    <p>Check your pickup assignments for today. View locations, times, and completion status.</p>
+                                    <a href="driver/assignments.php" class="btn-primary">
+                                        <i class="fas fa-eye"></i> View Assignments
                                     </a>
                                 </div>
                             </div>
+                            
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-route"></i>
+                                    </div>
+                                    <h3>My Routes</h3>
+                                    <p>View your assigned collection routes with optimized paths and navigation assistance.</p>
+                                    <a href="driver/routes.php" class="btn-primary">
+                                        <i class="fas fa-map"></i> View Routes
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-trash-restore"></i>
+                                    </div>
+                                    <h3>Collections</h3>
+                                    <p>Log your daily collections, track progress, and update completion status in real-time.</p>
+                                    <a href="driver/collections.php" class="btn-primary">
+                                        <i class="fas fa-plus-circle"></i> Log Collections
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-card">
+                                <div class="content-card">
+                                    <div class="content-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <h3>Earnings</h3>
+                                    <p>Track your earnings, view payment history, and monitor your financial performance.</p>
+                                    <a href="driver/earnings.php" class="btn-primary">
+                                        <i class="fas fa-chart-line"></i> View Earnings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Indicator -->
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <div class="status-text">You are currently active and ready for assignments</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notification Badge and Panel -->
+                <div class="notification-badge" id="notificationBadge">3</div>
+                <div class="notification-panel" id="notificationPanel">
+                    <div class="notification-header">
+                        <h4><i class="fas fa-bell"></i> Notifications</h4>
+                        <button class="close-btn" id="closeNotifications">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="notification-item unread">
+                            <h4>New Route Assigned</h4>
+                            <p>You have been assigned to Barangay Lahug route</p>
+                            <small>10:30 AM</small>
+                        </div>
+                        <div class="notification-item unread">
+                            <h4>Collection Reminder</h4>
+                            <p>Complete IT Park route by 5:00 PM today</p>
+                            <small>9:15 AM</small>
+                        </div>
+                        <div class="notification-item">
+                            <h4>System Update</h4>
+                            <p>New features added to the driver dashboard</p>
+                            <small>Yesterday</small>
+                        </div>
+                        <div class="notification-item">
+                            <h4>Earnings Update</h4>
+                            <p>Your weekly earnings have been calculated</p>
+                            <small>2 days ago</small>
                         </div>
                     </div>
                 </div>
@@ -434,209 +1072,108 @@ if (isset($link) && $link !== null) {
         </main>
     </div>
 
-    <!-- Modal for user actions -->
-    <div id="user-modal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <span id="modal-close" class="modal-close">&times;</span>
-            <h3 id="modal-title">Report Issue</h3>
-            <form id="user-action-form">
-                <input type="hidden" id="action-type" name="type" value="Feedback">
-                <div class="form-group">
-                    <label for="report-type">Type</label>
-                    <select id="report-type" name="type">
-                        <option value="Missed Pickup">Missed Pickup</option>
-                        <option value="Complaint">Complaint</option>
-                        <option value="Feedback">Feedback</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <input id="address" name="address" type="text" placeholder="House number, Street, Barangay" required />
-                </div>
-                <div class="form-group">
-                    <label for="location">Location (optional)</label>
-                    <input id="location" name="location" type="text" placeholder="e.g. Near Market / Landmark" />
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="button" id="modal-cancel" class="btn btn-outline">Cancel</button>
-                </div>
-                <div id="form-feedback" style="margin-top:8px;display:none;"></div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        // Mobile menu toggle
-        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
-            document.getElementById('mainNav').classList.toggle('active');
-        });
-
-        // Modal functionality
-        const modal = document.getElementById('user-modal');
-        const modalClose = document.getElementById('modal-close');
-        const modalCancel = document.getElementById('modal-cancel');
-        const reportMissedBtn = document.getElementById('report-missed-btn');
-        const trackComplaintBtn = document.getElementById('track-complaint-btn');
-        const feedbackBtn = document.getElementById('feedback-btn');
-        const formFeedback = document.getElementById('form-feedback');
-        const userActionForm = document.getElementById('user-action-form');
-        const reportTypeSelect = document.getElementById('report-type');
-
-        // Set default address
-        document.getElementById('address').value = '<?php echo htmlspecialchars($user_zone . ', ' . $user_barangay); ?>';
-
-        // Button click handlers
-        reportMissedBtn.addEventListener('click', function() {
-            document.getElementById('modal-title').textContent = 'Report Missed Pickup';
-            document.getElementById('action-type').value = 'Missed Pickup';
-            reportTypeSelect.value = 'Missed Pickup';
-            modal.style.display = 'block';
-        });
-
-        trackComplaintBtn.addEventListener('click', function() {
-            alert('Redirecting to complaint tracking page...');
-            window.location.href = 'complaint_tracking.php';
-        });
-
-        feedbackBtn.addEventListener('click', function() {
-            document.getElementById('modal-title').textContent = 'Submit Feedback';
-            document.getElementById('action-type').value = 'Feedback';
-            reportTypeSelect.value = 'Feedback';
-            modal.style.display = 'block';
-        });
-
-        // Close modal
-        modalClose.addEventListener('click', function() {
-            modal.style.display = 'none';
-            formFeedback.style.display = 'none';
-            userActionForm.reset();
-        });
-
-        modalCancel.addEventListener('click', function() {
-            modal.style.display = 'none';
-            formFeedback.style.display = 'none';
-            userActionForm.reset();
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-                formFeedback.style.display = 'none';
-                userActionForm.reset();
-            }
-        });
-
-        // Form submission
-        userActionForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mainNav = document.getElementById('mainNav');
             
-            const formData = new FormData(this);
-            formData.append('user_id', <?php echo $user_id; ?>);
-            formData.append('user_name', '<?php echo addslashes($user_name); ?>');
-            formData.append('barangay', '<?php echo addslashes($user_barangay); ?>');
-            
-            try {
-                const response = await fetch('submit_user_action.php', {
-                    method: 'POST',
-                    body: formData
+            if (mobileMenuToggle && mainNav) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    const navContainer = mainNav.querySelector('.nav-container');
+                    if (navContainer) {
+                        navContainer.style.display = navContainer.style.display === 'flex' ? 'none' : 'flex';
+                    }
                 });
-                
-                const result = await response.json();
-                
-                formFeedback.style.display = 'block';
-                if (result.success) {
-                    formFeedback.textContent = result.message;
-                    formFeedback.className = 'success';
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                        formFeedback.style.display = 'none';
-                        userActionForm.reset();
-                    }, 2000);
-                } else {
-                    formFeedback.textContent = result.message || 'Error submitting form';
-                    formFeedback.className = 'error';
-                }
-            } catch (error) {
-                formFeedback.style.display = 'block';
-                formFeedback.textContent = 'Network error. Please try again.';
-                formFeedback.className = 'error';
-                console.error('Error:', error);
             }
-        });
-
-        // Mark notifications as read when clicked
-        document.querySelectorAll('.notification-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const notificationId = this.dataset.id;
-                if (notificationId && this.classList.contains('unread')) {
-                    // Send AJAX request to mark as read
-                    fetch('mark_notification_read.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ notification_id: notificationId })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            this.classList.remove('unread');
-                            // Update unread count in bell icon if exists
-                            const bellIcon = document.querySelector('.fa-bell');
-                            if (bellIcon) {
-                                const currentCount = parseInt(bellIcon.dataset.count || '0');
-                                if (currentCount > 0) {
-                                    bellIcon.dataset.count = currentCount - 1;
-                                }
-                            }
-                        }
+            
+            // Notification handling
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const closeNotifications = document.getElementById('closeNotifications');
+            
+            if (notificationBadge && notificationPanel) {
+                notificationBadge.addEventListener('click', function() {
+                    notificationPanel.style.display = notificationPanel.style.display === 'block' ? 'none' : 'block';
+                    
+                    // Mark all as read when opening
+                    const unreadItems = notificationPanel.querySelectorAll('.notification-item.unread');
+                    unreadItems.forEach(item => {
+                        item.classList.remove('unread');
                     });
+                    
+                    // Update badge count
+                    notificationBadge.textContent = '0';
+                    notificationBadge.style.display = 'none';
+                });
+            }
+            
+            if (closeNotifications && notificationPanel) {
+                closeNotifications.addEventListener('click', function() {
+                    notificationPanel.style.display = 'none';
+                });
+            }
+            
+            // Close notification panel when clicking outside
+            document.addEventListener('click', function(event) {
+                if (notificationPanel && notificationPanel.style.display === 'block') {
+                    if (!notificationPanel.contains(event.target) && event.target !== notificationBadge) {
+                        notificationPanel.style.display = 'none';
+                    }
                 }
             });
-        });
-
-        // Real-time data fetching
-        const user_id = <?php echo json_encode($user_id); ?>;
-        const user_barangay = <?php echo json_encode($user_barangay); ?>;
-        const initial_unread_count = <?php echo $unread_count; ?>;
-
-        async function fetchRealtimeData() {
-            try {
-                const response = await fetch('http://localhost:3000/api/collections/stats');
-                const data = await response.json();
-
-                // Update pickup status with real data
-                const statusElement = document.querySelector('.pickup-status p');
-                if (statusElement) {
-                    statusElement.textContent = `Completed: ${data.completedToday} | Pending: ${data.pendingPickups}`;
+            
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.dashboard-card, .stat-item, .action-item');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    if (card.classList.contains('dashboard-card')) {
+                        card.style.transform = 'translateY(-5px)';
+                    } else if (card.classList.contains('stat-item')) {
+                        card.style.transform = 'translateY(-3px)';
+                    } else if (card.classList.contains('action-item')) {
+                        card.style.transform = 'translateY(-3px)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    if (card.classList.contains('dashboard-card')) {
+                        card.style.transform = 'translateY(0)';
+                    } else if (card.classList.contains('stat-item')) {
+                        card.style.transform = 'translateY(0)';
+                    } else if (card.classList.contains('action-item')) {
+                        card.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            // Responsive navigation
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    if (mainNav) {
+                        const navContainer = mainNav.querySelector('.nav-container');
+                        if (navContainer) navContainer.style.display = 'flex';
+                    }
+                } else {
+                    if (mainNav) {
+                        const navContainer = mainNav.querySelector('.nav-container');
+                        if (navContainer) navContainer.style.display = 'none';
+                    }
                 }
-
-                // Update progress bar
-                const progressFill = document.querySelector('.progress-fill');
-                const progressText = document.querySelector('.progress-text');
-                if (progressFill && progressText && data.totalCollections > 0) {
-                    const percentage = Math.round((data.completedToday / (data.completedToday + data.pendingPickups)) * 100);
-                    progressFill.style.width = `${percentage}%`;
-                    progressText.textContent = `${percentage}% of today's collections completed.`;
-                }
-
-                console.log('Real-time data updated:', data);
-            } catch (error) {
-                console.error('Failed to fetch real-time data:', error);
             }
-        }
-
-        // Fetch data on page load and every 30 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchRealtimeData();
-            setInterval(fetchRealtimeData, 30000);
+            
+            // Initial check
+            handleResize();
+            
+            // Listen for resize events
+            window.addEventListener('resize', handleResize);
+            
+            // Add animation to cards on load
+            const statCards = document.querySelectorAll('.stat-item');
+            statCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease';
+            });
         });
     </script>
 </body>
