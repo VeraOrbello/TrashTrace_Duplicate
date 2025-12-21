@@ -18,6 +18,116 @@ $driver_name = $_SESSION["full_name"];
 // Get driver's location (for demo, use Cebu City coordinates)
 $default_lat = 10.3157;
 $default_lng = 123.8854;
+
+// Initialize or restore route progress from session
+if(!isset($_SESSION['route_progress'])) {
+    $_SESSION['route_progress'] = [];
+}
+
+// Initialize completed routes in session
+if(!isset($_SESSION['completed_routes'])) {
+    $_SESSION['completed_routes'] = [];
+}
+
+// Check for completed route parameter and update session
+if(isset($_GET['completed'])) {
+    $route_id = $_GET['completed'];
+    
+    // If this route isn't already marked as completed in session, mark it
+    $is_already_completed = false;
+    foreach($_SESSION['completed_routes'] as $route) {
+        if($route['id'] == $route_id) {
+            $is_already_completed = true;
+            break;
+        }
+    }
+    
+    if(!$is_already_completed) {
+        // This would normally come from database, but for demo, create sample data
+        $_SESSION['completed_routes'][] = [
+            'id' => $route_id,
+            'route_name' => "Route #" . $route_id,
+            'start_point' => "Start Location",
+            'end_point' => "End Location",
+            'distance_km' => rand(5, 15) . '.' . rand(0, 9),
+            'estimated_time' => rand(90, 240) . ' min',
+            'collections_count' => rand(8, 25),
+            'total_weight' => rand(150, 800),
+            'total_amount' => rand(150, 800) * 5,
+            'zone_name' => 'Zone ' . chr(65 + ($route_id % 5)),
+            'area' => 'Cebu City',
+            'status' => 'completed',
+            'type' => 'route',
+            'completed_at' => date('Y-m-d H:i:s')
+        ];
+    }
+}
+// Handle route completion
+if(isset($_POST['complete_route']) && isset($_POST['route_id'])) {
+    $route_id = $_POST['route_id'];
+    $route_data = json_decode($_POST['route_data'], true);
+    
+    // Store completed route in session
+    $completed_route = [
+        'id' => $route_id,
+        'route_name' => $route_data['name'] ?? 'Unknown Route',
+        'start_point' => $route_data['start'] ?? 'Unknown Start',
+        'end_point' => $route_data['end'] ?? 'Unknown End',
+        'distance_km' => str_replace(' km', '', $route_data['distance'] ?? '0'),
+        'estimated_time' => $route_data['estimatedTime'] ?? '0 min',
+        'collections_count' => $route_data['stops'] ?? 0,
+        'total_weight' => rand(150, 800),
+        'total_amount' => rand(150, 800) * 5,
+        'zone_name' => 'Zone ' . chr(65 + ($route_id % 5)),
+        'area' => 'Cebu City',
+        'status' => 'completed',
+        'type' => 'route',
+        'completed_at' => date('Y-m-d H:i:s'),
+        'driver_id' => $driver_id,
+        'driver_name' => $driver_name
+    ];
+    
+    $_SESSION['completed_routes'][] = $completed_route;
+    
+    // Save to database for permanent storage
+    try {
+        $sql = "INSERT INTO routes_history (route_id, route_name, start_point, end_point, distance, estimated_time, stops_count, driver_id, driver_name, completed_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        // Create variables for the bind parameters
+        $route_name = $route_data['name'] ?? 'Unknown Route';
+        $start_point = $route_data['start'] ?? 'Unknown Start';
+        $end_point = $route_data['end'] ?? 'Unknown End';
+        $distance = $route_data['distance'] ?? '0 km';
+        $estimated_time = $route_data['estimatedTime'] ?? '0 min';
+        $stops_count = $route_data['stops'] ?? 0;
+        $completed_at = date('Y-m-d H:i:s');
+        
+        if($stmt = mysqli_prepare($link, $sql)){
+            mysqli_stmt_bind_param($stmt, "isssssiiss", 
+                $route_id,
+                $route_name,
+                $start_point,
+                $end_point,
+                $distance,
+                $estimated_time,
+                $stops_count,
+                $driver_id,
+                $driver_name,
+                $completed_at
+            );
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+    } catch(Exception $e) {
+        error_log("Error saving route to history: " . $e->getMessage());
+    }
+    
+    // Redirect to avoid form resubmission
+    header("Location: routes.php?completed=" . $route_id);
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -905,6 +1015,153 @@ $default_lng = 123.8854;
             max-width: 600px;
             line-height: 1.5;
         }
+        
+        /* Truck animation path */
+        .truck-path {
+            stroke-dasharray: 10, 10;
+            animation: moveTruck 20s linear infinite;
+        }
+        
+        @keyframes moveTruck {
+            0% {
+                stroke-dashoffset: 1000;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        /* Success toast */
+        .success-toast {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+            animation: slideInRight 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 350px;
+        }
+        
+        .success-toast i {
+            font-size: 1.5rem;
+        }
+        
+        /* Route completion modal */
+        .completion-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .completion-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.3s ease;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .completion-icon {
+            font-size: 4rem;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        
+        .completion-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .completion-stat {
+            padding: 15px;
+            background: #f8fdf9;
+            border-radius: 12px;
+        }
+        
+        .completion-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+        
+        .completion-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* Real-time tracking panel */
+        .tracking-panel {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .tracking-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tracking-header i {
+            color: #4caf50;
+            font-size: 1.2rem;
+        }
+        
+        .tracking-header h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .tracking-info {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .tracking-info strong {
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -963,10 +1220,20 @@ $default_lng = 123.8854;
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-route"></i>
-                        Driver Routes
+                        Driver Routes - Live Demo
                     </h1>
-                    <p class="page-subtitle">View and manage your collection routes, track progress, and navigate efficiently.</p>
+                    <p class="page-subtitle">Track real-time truck movement, navigate routes, and automatically sync completed routes to history.</p>
                 </div>
+                
+                <?php if(isset($_GET['completed'])): ?>
+                    <div class="success-toast" id="completionToast">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Route Completed!</strong>
+                            <p>Route #<?php echo $_GET['completed']; ?> has been saved to your history.</p>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 
                 <div class="dashboard-grid">
                     <!-- Sidebar with routes and statistics -->
@@ -994,6 +1261,18 @@ $default_lng = 123.8854;
                     <div class="main-content">
                         <div class="map-container">
                             <div id="map"></div>
+                            <div class="tracking-panel" id="trackingPanel">
+                                <div class="tracking-header">
+                                    <i class="fas fa-satellite-dish"></i>
+                                    <h4>Live Tracking Active</h4>
+                                </div>
+                                <div class="tracking-info">
+                                    <p><strong>Truck ID:</strong> TT-<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></p>
+                                    <p><strong>Driver:</strong> <?php echo $driver_name; ?></p>
+                                    <p><strong>Status:</strong> <span id="trackingStatus">Ready</span></p>
+                                    <p><strong>Speed:</strong> <span id="trackingSpeed">0 km/h</span></p>
+                                </div>
+                            </div>
                             <div class="notification-badge" id="notificationBadge">3</div>
                             <div class="notification-panel" id="notificationPanel">
                                 <div class="notification-header">
@@ -1008,7 +1287,7 @@ $default_lng = 123.8854;
                             </div>
                             <div class="live-indicator">
                                 <div class="live-dot"></div>
-                                <span>Live Location Tracking</span>
+                                <span>Live Truck Tracking</span>
                             </div>
                         </div>
                         
@@ -1027,7 +1306,7 @@ $default_lng = 123.8854;
                                         <i class="fas fa-pause-circle"></i> Pause
                                     </button>
                                     <button class="btn btn-outline" id="completeRoute">
-                                        <i class="fas fa-check-circle"></i> Complete
+                                        <i class="fas fa-check-circle"></i> Complete Route
                                     </button>
                                     <button class="btn btn-outline" id="reportIssue">
                                         <i class="fas fa-exclamation-triangle"></i> Report Issue
@@ -1095,6 +1374,13 @@ $default_lng = 123.8854;
                 </div>
             </div>
         </main>
+        
+        <!-- Route Completion Form -->
+        <form id="routeCompletionForm" method="POST" style="display: none;">
+            <input type="hidden" name="complete_route" value="1">
+            <input type="hidden" name="route_id" id="completeRouteId">
+            <input type="hidden" name="route_data" id="completeRouteData">
+        </form>
     </div>
     
     <!-- Leaflet JS -->
@@ -1114,16 +1400,27 @@ $default_lng = 123.8854;
         let currentRoute = null;
         let routingControl = null;
         let userMarker = null;
+        let truckMarker = null;
         let watchId = null;
         let socket = null;
         let notifications = [];
         let selectedRoute = null;
         let routeProgress = 0;
+        let isNavigating = false;
+        let truckInterval = null;
+        let truckPosition = null;
+        let truckSpeed = 0;
+        let truckDirection = 0;
+        let currentWaypointIndex = 0;
+        let truckPath = null;
+        let routePath = null;
+        let routeWaypoints = [];
+        let realRouteCoordinates = [];
         
         // Cebu City coordinates
         const CEBU_COORDS = [10.3157, 123.8854];
         
-        // Sample routes data
+        // Demo routes with realistic waypoints for Cebu City - FIXED FORMAT
         const routes = [
             {
                 id: 1,
@@ -1134,12 +1431,16 @@ $default_lng = 123.8854;
                 distance: "8.5 km",
                 estimatedTime: "2 hours 15 min",
                 status: "pending",
-                progress: 0,
+                progress: <?php echo isset($_SESSION['route_progress'][1]) ? $_SESSION['route_progress'][1] : 0; ?>,
                 waypoints: [
-                    [10.3157, 123.8854], // Cebu City Hall
-                    [10.3245, 123.8943], // Lahug Area 1
-                    [10.3298, 123.9021], // Lahug Area 2
-                    [10.3342, 123.9087], // Lahug Market
+                    {lat: 10.3157, lng: 123.8854, name: "Cebu City Hall"}, // Start
+                    {lat: 10.3190, lng: 123.8880, name: "Osmena Blvd"},
+                    {lat: 10.3220, lng: 123.8910, name: "Gorordo Ave"},
+                    {lat: 10.3245, lng: 123.8943, name: "Lahug Area"},
+                    {lat: 10.3270, lng: 123.8970, name: "Salinas Drive"},
+                    {lat: 10.3298, lng: 123.9021, name: "JY Square"},
+                    {lat: 10.3320, lng: 123.9050, name: "IT Park"},
+                    {lat: 10.3342, lng: 123.9087, name: "Lahug Market"} // End
                 ]
             },
             {
@@ -1150,13 +1451,19 @@ $default_lng = 123.8854;
                 stops: 22,
                 distance: "12.3 km",
                 estimatedTime: "3 hours 30 min",
-                status: "active",
-                progress: 35,
+                status: "pending",
+                progress: <?php echo isset($_SESSION['route_progress'][2]) ? $_SESSION['route_progress'][2] : 0; ?>,
                 waypoints: [
-                    [10.3347, 123.9054], // IT Park
-                    [10.3289, 123.8987], // Apas Zone 1
-                    [10.3223, 123.8912], // Apas Zone 2
-                    [10.3168, 123.8845], // Apas Terminal
+                    {lat: 10.3347, lng: 123.9054, name: "IT Park"},
+                    {lat: 10.3320, lng: 123.9020, name: "AS Fortuna"},
+                    {lat: 10.3295, lng: 123.8990, name: "Mango Ave"},
+                    {lat: 10.3289, lng: 123.8987, name: "Apas Zone 1"},
+                    {lat: 10.3260, lng: 123.8960, name: "Capitol Area"},
+                    {lat: 10.3240, lng: 123.8935, name: "Escario St"},
+                    {lat: 10.3223, lng: 123.8912, name: "Apas Zone 2"},
+                    {lat: 10.3200, lng: 123.8880, name: "Jones Ave"},
+                    {lat: 10.3180, lng: 123.8860, name: "Colon St"},
+                    {lat: 10.3168, lng: 123.8845, name: "Apas Terminal"}
                 ]
             },
             {
@@ -1167,13 +1474,17 @@ $default_lng = 123.8854;
                 stops: 18,
                 distance: "6.8 km",
                 estimatedTime: "2 hours",
-                status: "completed",
-                progress: 100,
+                status: "pending",
+                progress: <?php echo isset($_SESSION['route_progress'][3]) ? $_SESSION['route_progress'][3] : 0; ?>,
                 waypoints: [
-                    [10.2939, 123.9025], // Carbon Market
-                    [10.2987, 123.8983], // Downtown Area 1
-                    [10.3021, 123.8947], // Downtown Area 2
-                    [10.3054, 123.8912], // Colon Street
+                    {lat: 10.2939, lng: 123.9025, name: "Carbon Market"},
+                    {lat: 10.2955, lng: 123.9010, name: "P. Gullas St"},
+                    {lat: 10.2970, lng: 123.8995, name: "Manalili St"},
+                    {lat: 10.2987, lng: 123.8983, name: "Downtown Area 1"},
+                    {lat: 10.3005, lng: 123.8965, name: "Borromeo St"},
+                    {lat: 10.3021, lng: 123.8947, name: "Downtown Area 2"},
+                    {lat: 10.3035, lng: 123.8930, name: "Sanciangko St"},
+                    {lat: 10.3054, lng: 123.8912, name: "Colon Street"}
                 ]
             }
         ];
@@ -1182,41 +1493,33 @@ $default_lng = 123.8854;
         const sampleNotifications = [
             {
                 id: 1,
-                title: "New Route Available",
-                message: "Barangay Lahug route has been assigned to you",
-                time: "10:30 AM",
+                title: "Live Demo Activated",
+                message: "Real-time truck tracking is now active. Select a route to start navigation.",
+                time: "Just now",
                 type: "info",
                 read: false
             },
             {
                 id: 2,
-                title: "Route Update",
-                message: "Apas Residential route progress: 35% completed",
-                time: "9:15 AM",
+                title: "System Ready",
+                message: "All systems are operational. GPS tracking is active.",
+                time: "2 min ago",
                 type: "success",
                 read: false
             },
             {
                 id: 3,
-                title: "Traffic Alert",
-                message: "Heavy traffic reported near IT Park",
-                time: "8:45 AM",
-                type: "warning",
-                read: false
-            },
-            {
-                id: 4,
-                title: "Collection Reminder",
-                message: "Complete Downtown route by 5:00 PM today",
-                time: "Yesterday",
+                title: "Demo Tip",
+                message: "Complete a route to see it automatically saved to your history.",
+                time: "5 min ago",
                 type: "info",
-                read: true
+                read: false
             }
         ];
         
         // Initialize map
         function initMap() {
-            map = L.map('map').setView(CEBU_COORDS, 13);
+            map = L.map('map').setView(CEBU_COORDS, 14);
             
             // Add OpenStreetMap tiles with custom styling
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1264,6 +1567,15 @@ $default_lng = 123.8854;
             
             // Update progress bar
             updateProgressBar();
+            
+            // Auto-hide success toast after 5 seconds
+            const toast = document.getElementById('completionToast');
+            if (toast) {
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
         }
         
         // Load routes to sidebar
@@ -1277,6 +1589,12 @@ $default_lng = 123.8854;
             
             // Add routes to list
             routes.forEach(route => {
+                // Check session for saved progress
+                const savedProgress = <?php echo json_encode($_SESSION['route_progress']); ?>;
+                if(savedProgress && savedProgress[route.id]) {
+                    route.progress = savedProgress[route.id];
+                }
+                
                 const routeItem = document.createElement('div');
                 routeItem.className = `route-item ${route.status === 'active' ? 'active' : ''}`;
                 routeItem.innerHTML = `
@@ -1299,12 +1617,6 @@ $default_lng = 123.8854;
                 
                 routeItem.addEventListener('click', () => selectRoute(route));
                 routeList.appendChild(routeItem);
-                
-                if (route.status === 'active') {
-                    selectedRoute = route;
-                    updateRouteDetails(route);
-                    plotRoute(route.waypoints);
-                }
             });
             
             // Update statistics
@@ -1350,7 +1662,7 @@ $default_lng = 123.8854;
             // Update progress bar
             updateProgressBar();
             
-            // Plot route on map
+            // Plot route on map using real road routing
             plotRoute(route.waypoints);
             
             // Send notification
@@ -1374,16 +1686,29 @@ $default_lng = 123.8854;
             progressPercentage.textContent = `${routeProgress}%`;
         }
         
-        // Plot route on map
+        // Plot route using Leaflet Routing Machine
         function plotRoute(waypoints) {
             // Clear previous route
             if (routingControl) {
                 map.removeControl(routingControl);
             }
+            if (truckPath) {
+                map.removeLayer(truckPath);
+            }
+            if (truckMarker) {
+                map.removeLayer(truckMarker);
+            }
+            if (routePath) {
+                map.removeLayer(routePath);
+            }
             
-            // Create new route
+            // Convert waypoints to LatLng objects
+            const latLngWaypoints = waypoints.map(wp => L.latLng(wp.lat, wp.lng));
+            routeWaypoints = latLngWaypoints;
+            
+            // Create routing control with real road routing
             routingControl = L.Routing.control({
-                waypoints: waypoints.map(wp => L.latLng(wp[0], wp[1])),
+                waypoints: latLngWaypoints,
                 routeWhileDragging: false,
                 showAlternatives: false,
                 fitSelectedRoutes: true,
@@ -1417,83 +1742,311 @@ $default_lng = 123.8854;
                         {
                             color: '#4caf50',
                             opacity: 0.8,
-                            weight: 5,
-                            dashArray: '10, 10'
+                            weight: 5
                         }
                     ]
-                }
+                },
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1'
+                })
             }).addTo(map);
             
             // Add event listener for route changes
             routingControl.on('routesfound', function(e) {
                 const routes = e.routes;
-                const summary = routes[0].summary;
+                if (routes && routes.length > 0) {
+                    const route = routes[0];
+                    const summary = route.summary;
+                    
+                    // Store route coordinates for truck simulation
+                    realRouteCoordinates = route.coordinates;
+                    
+                    // Create a smooth path for visualization
+                    routePath = L.polyline(route.coordinates, {
+                        color: '#4caf50',
+                        weight: 4,
+                        opacity: 0.6,
+                        dashArray: '10, 10'
+                    }).addTo(map);
+                    
+                    // Update route details with real calculations
+                    if (selectedRoute) {
+                        selectedRoute.distance = (summary.totalDistance / 1000).toFixed(1) + ' km';
+                        selectedRoute.estimatedTime = Math.round(summary.totalTime / 60) + ' min';
+                        updateRouteDetails(selectedRoute);
+                    }
+                    
+                    addNotification(`Route calculated: ${(summary.totalDistance / 1000).toFixed(1)} km, ${Math.round(summary.totalTime / 60)} min`, 'success');
+                    
+                    // If navigation was previously active, restore truck position
+                    if (isNavigating && selectedRoute.progress > 0) {
+                        restoreTruckPosition();
+                    }
+                }
+            });
+            
+            routingControl.on('routingerror', function(e) {
+                console.error('Routing error:', e.error);
+                addNotification('Could not calculate route. Using straight line path.', 'warning');
                 
-                // Update route details with real calculations
-                if (selectedRoute) {
-                    selectedRoute.distance = (summary.totalDistance / 1000).toFixed(1) + ' km';
-                    selectedRoute.estimatedTime = Math.round(summary.totalTime / 60) + ' min';
-                    updateRouteDetails(selectedRoute);
+                // Fallback: create straight line path
+                realRouteCoordinates = latLngWaypoints.map(wp => [wp.lat, wp.lng]);
+                routePath = L.polyline(realRouteCoordinates, {
+                    color: '#4caf50',
+                    weight: 4,
+                    opacity: 0.6,
+                    dashArray: '10, 10'
+                }).addTo(map);
+                
+                // Calculate approximate distance
+                const distance = calculateStraightLineDistance(latLngWaypoints);
+                selectedRoute.distance = distance.toFixed(1) + ' km';
+                selectedRoute.estimatedTime = Math.round(distance * 10) + ' min';
+                updateRouteDetails(selectedRoute);
+            });
+        }
+        
+        // Calculate straight line distance as fallback
+        function calculateStraightLineDistance(waypoints) {
+            let totalDistance = 0;
+            for (let i = 1; i < waypoints.length; i++) {
+                const prev = waypoints[i-1];
+                const curr = waypoints[i];
+                const distance = prev.distanceTo(curr) / 1000; // Convert to km
+                totalDistance += distance;
+            }
+            return totalDistance;
+        }
+        
+        // Restore truck position based on saved progress
+        function restoreTruckPosition() {
+            if (!selectedRoute || !realRouteCoordinates || realRouteCoordinates.length === 0) return;
+            
+            // Calculate position based on progress percentage
+            const totalPoints = realRouteCoordinates.length;
+            const progressIndex = Math.floor((selectedRoute.progress / 100) * totalPoints);
+            const targetIndex = Math.min(progressIndex, totalPoints - 1);
+            
+            // Get position from route coordinates
+            const position = realRouteCoordinates[targetIndex];
+            truckPosition = [position.lat, position.lng];
+            
+            // Create or update truck marker
+            if (!truckMarker) {
+                createTruckMarker();
+            }
+            truckMarker.setLatLng(truckPosition);
+            
+            // Update progress
+            routeProgress = selectedRoute.progress;
+            updateProgressBar();
+            
+            // Update tracking status
+            document.getElementById('trackingStatus').textContent = 'Paused';
+            document.getElementById('trackingStatus').style.color = '#ff9800';
+            
+            addNotification(`Restored to ${routeProgress}% progress`, 'info');
+        }
+        
+        // Create truck marker
+        function createTruckMarker() {
+            truckMarker = L.marker(truckPosition || CEBU_COORDS, {
+                icon: L.divIcon({
+                    className: 'truck-marker',
+                    html: `<div style="background: linear-gradient(135deg, #ff9800, #f57c00); width: 40px; height: 40px; border-radius: 8px; border: 3px solid white; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; transform: rotate(45deg);">T</div>`,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                })
+            }).addTo(map);
+        }
+        
+        // Start truck simulation along the route
+        function startTruckSimulation() {
+            if (truckInterval) {
+                clearInterval(truckInterval);
+            }
+            
+            if (!truckMarker) {
+                createTruckMarker();
+            }
+            
+            if (!realRouteCoordinates || realRouteCoordinates.length === 0) {
+                addNotification('Route not calculated yet. Please wait.', 'warning');
+                return;
+            }
+            
+            // Determine starting position based on progress
+            let currentIndex = 0;
+            if (routeProgress > 0) {
+                currentIndex = Math.floor((routeProgress / 100) * (realRouteCoordinates.length - 1));
+                currentIndex = Math.min(currentIndex, realRouteCoordinates.length - 2);
+            }
+            
+            let segmentProgress = 0;
+            const totalSegments = realRouteCoordinates.length - 1;
+            
+            // Start moving truck
+            truckInterval = setInterval(() => {
+                if (!isNavigating || currentIndex >= totalSegments) {
+                    return;
                 }
                 
-                addNotification(`Route calculated: ${(summary.totalDistance / 1000).toFixed(1)} km, ${Math.round(summary.totalTime / 60)} min`, 'success');
-            });
+                // Get current segment
+                const startPoint = realRouteCoordinates[currentIndex];
+                const endPoint = realRouteCoordinates[currentIndex + 1];
+                
+                // Calculate intermediate position
+                const lat = startPoint.lat + (endPoint.lat - startPoint.lat) * segmentProgress;
+                const lng = startPoint.lng + (endPoint.lng - startPoint.lng) * segmentProgress;
+                
+                truckPosition = [lat, lng];
+                truckMarker.setLatLng(truckPosition);
+                
+                // Update speed (based on road type - slower in dense areas)
+                truckSpeed = Math.floor(Math.random() * 20) + 30; // 30-50 km/h
+                document.getElementById('trackingSpeed').textContent = `${truckSpeed} km/h`;
+                
+                // Update segment progress
+                segmentProgress += 0.01; // Move 1% along segment
+                
+                // Check if reached next point
+                if (segmentProgress >= 1) {
+                    segmentProgress = 0;
+                    currentIndex++;
+                    
+                    // Update waypoint index for UI
+                    currentWaypointIndex = Math.min(currentIndex, routeWaypoints.length - 1);
+                    
+                    if (currentIndex < totalSegments) {
+                        addNotification(`Reached point ${currentIndex + 1}/${totalSegments + 1}`, 'info');
+                    }
+                }
+                
+                // Update overall progress
+                routeProgress = Math.min(100, ((currentIndex + segmentProgress) / totalSegments) * 100);
+                selectedRoute.progress = routeProgress;
+                
+                // Save progress to session
+                saveRouteProgress();
+                
+                updateProgressBar();
+                
+                // Pan map to follow truck
+                map.panTo(truckPosition);
+                
+                // Check if completed
+                if (currentIndex >= totalSegments && segmentProgress >= 1) {
+                    completeTruckJourney();
+                }
+                
+            }, 100); // Update every 100ms
+            
+            addNotification('Truck simulation started', 'success');
+            document.getElementById('trackingStatus').textContent = 'Moving';
+            document.getElementById('trackingStatus').style.color = '#4caf50';
+        }
+        
+        // Save route progress to session via AJAX
+        function saveRouteProgress() {
+            if (!selectedRoute) return;
+            
+            // Save to session via AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'save_progress.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send(`route_id=${selectedRoute.id}&progress=${routeProgress}`);
+        }
+        
+        // Stop truck simulation
+        function stopTruckSimulation() {
+            if (truckInterval) {
+                clearInterval(truckInterval);
+                truckInterval = null;
+            }
+            document.getElementById('trackingStatus').textContent = 'Stopped';
+            document.getElementById('trackingStatus').style.color = '#f44336';
+            truckSpeed = 0;
+            document.getElementById('trackingSpeed').textContent = '0 km/h';
+        }
+        
+        // Complete truck journey
+        function completeTruckJourney() {
+            stopTruckSimulation();
+            selectedRoute.status = 'completed';
+            selectedRoute.progress = 100;
+            
+            // Update UI
+            updateRouteDetails(selectedRoute);
+            updateProgressBar();
+            loadRoutes();
+            
+            addNotification('Route completed!', 'success');
+            document.getElementById('trackingStatus').textContent = 'Completed';
+            document.getElementById('trackingStatus').style.color = '#2e7d32';
+            
+            // Auto-complete the route
+            completeCurrentRoute();
         }
         
         // Initialize WebSocket for real-time updates
         function initWebSocket() {
             // Connect to WebSocket server
-            socket = io('http://localhost:3000', {
-                transports: ['websocket'],
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000
-            });
-            
-            socket.on('connect', () => {
-                console.log('Connected to WebSocket server');
-                addNotification('Connected to real-time server', 'success');
-            });
-            
-            socket.on('disconnect', () => {
-                console.log('Disconnected from WebSocket server');
-                addNotification('Disconnected from server', 'warning');
-            });
-            
-            socket.on('driver_update', (data) => {
-                console.log('Driver update received:', data);
-                if (data.driver_id === <?php echo $driver_id; ?>) {
-                    // Update driver position if provided
-                    if (data.position) {
-                        userMarker.setLatLng([data.position.lat, data.position.lng]);
-                        map.panTo([data.position.lat, data.position.lng]);
-                    }
-                    
-                    // Add notification
-                    if (data.message) {
-                        addNotification(data.message, data.type || 'info');
-                    }
-                }
-            });
-            
-            socket.on('route_update', (data) => {
-                console.log('Route update received:', data);
-                addNotification(`Route update: ${data.message}`, data.type || 'info');
+            try {
+                socket = io('http://localhost:3000', {
+                    transports: ['websocket'],
+                    reconnection: true,
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000
+                });
                 
-                // Update route if needed
-                if (selectedRoute && selectedRoute.id === data.route_id) {
-                    selectedRoute.status = data.status;
-                    selectedRoute.progress = data.progress || 0;
-                    updateRouteDetails(selectedRoute);
-                    updateProgressBar();
-                    loadRoutes();
-                }
-            });
-            
-            socket.on('notification', (data) => {
-                console.log('Notification received:', data);
-                addNotification(data.message, data.type || 'info');
-            });
+                socket.on('connect', () => {
+                    console.log('Connected to WebSocket server');
+                    addNotification('Connected to real-time server', 'success');
+                });
+                
+                socket.on('disconnect', () => {
+                    console.log('Disconnected from WebSocket server');
+                    addNotification('Disconnected from server', 'warning');
+                });
+                
+                socket.on('driver_update', (data) => {
+                    console.log('Driver update received:', data);
+                    if (data.driver_id === <?php echo $driver_id; ?>) {
+                        // Update driver position if provided
+                        if (data.position) {
+                            userMarker.setLatLng([data.position.lat, data.position.lng]);
+                            map.panTo([data.position.lat, data.position.lng]);
+                        }
+                        
+                        // Add notification
+                        if (data.message) {
+                            addNotification(data.message, data.type || 'info');
+                        }
+                    }
+                });
+                
+                socket.on('route_update', (data) => {
+                    console.log('Route update received:', data);
+                    addNotification(`Route update: ${data.message}`, data.type || 'info');
+                    
+                    // Update route if needed
+                    if (selectedRoute && selectedRoute.id === data.route_id) {
+                        selectedRoute.status = data.status;
+                        selectedRoute.progress = data.progress || 0;
+                        updateRouteDetails(selectedRoute);
+                        updateProgressBar();
+                        loadRoutes();
+                    }
+                });
+                
+                socket.on('notification', (data) => {
+                    console.log('Notification received:', data);
+                    addNotification(data.message, data.type || 'info');
+                });
+            } catch (error) {
+                console.log('WebSocket connection failed, using demo mode:', error);
+                addNotification('Running in demo mode. Real-time features simulated.', 'info');
+            }
         }
         
         // Start location tracking
@@ -1530,30 +2083,10 @@ $default_lng = 123.8854;
                                 timestamp: new Date().toISOString()
                             });
                         }
-                        
-                        // Update progress if near waypoints
-                        if (selectedRoute && selectedRoute.status === 'active') {
-                            map.panTo([latitude, longitude]);
-                            
-                            // Simulate progress update based on movement
-                            if (Math.random() > 0.7 && routeProgress < 100) {
-                                routeProgress += Math.random() * 5;
-                                if (routeProgress > 100) routeProgress = 100;
-                                updateProgressBar();
-                                
-                                if (socket && socket.connected) {
-                                    socket.emit('progress_update', {
-                                        route_id: selectedRoute.id,
-                                        progress: routeProgress,
-                                        driver_id: <?php echo $driver_id; ?>
-                                    });
-                                }
-                            }
-                        }
                     },
                     (error) => {
                         console.error('Geolocation error:', error);
-                        addNotification('Unable to get your location', 'error');
+                        addNotification('Using simulated GPS for demo', 'info');
                     },
                     {
                         enableHighAccuracy: true,
@@ -1562,7 +2095,7 @@ $default_lng = 123.8854;
                     }
                 );
             } else {
-                addNotification('Geolocation is not supported by your browser', 'error');
+                addNotification('Geolocation not supported, using demo mode', 'info');
             }
         }
         
@@ -1729,12 +2262,113 @@ $default_lng = 123.8854;
             }
         }
         
+        // Show completion modal
+        function showCompletionModal(route) {
+            const modal = document.createElement('div');
+            modal.className = 'completion-modal';
+            modal.innerHTML = `
+                <div class="completion-content">
+                    <div class="completion-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Route Completed!</h2>
+                    <p>${route.name} has been successfully completed and saved to your history.</p>
+                    
+                    <div class="completion-stats">
+                        <div class="completion-stat">
+                            <div class="completion-stat-value">${route.distance}</div>
+                            <div class="completion-stat-label">Distance</div>
+                        </div>
+                        <div class="completion-stat">
+                            <div class="completion-stat-value">${route.estimatedTime}</div>
+                            <div class="completion-stat-label">Time</div>
+                        </div>
+                        <div class="completion-stat">
+                            <div class="completion-stat-value">${route.stops}</div>
+                            <div class="completion-stat-label">Stops</div>
+                        </div>
+                        <div class="completion-stat">
+                            <div class="completion-stat-value">100%</div>
+                            <div class="completion-stat-label">Progress</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 25px;">
+                        <button class="btn btn-primary" id="viewHistoryBtn" style="flex: 1;">
+                            <i class="fas fa-history"></i> View in History
+                        </button>
+                        <button class="btn btn-outline" id="closeModalBtn" style="flex: 1;">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Event listeners for modal buttons
+            document.getElementById('viewHistoryBtn').addEventListener('click', () => {
+                window.location.href = 'history.php';
+            });
+            
+            document.getElementById('closeModalBtn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // Complete route and save to history
+        function completeCurrentRoute() {
+            if (!selectedRoute) {
+                addNotification('Please select a route first', 'warning');
+                return;
+            }
+            
+            // Update route status
+            selectedRoute.status = 'completed';
+            selectedRoute.progress = 100;
+            
+            // Stop truck simulation
+            stopTruckSimulation();
+            isNavigating = false;
+            
+            // Update UI
+            updateRouteDetails(selectedRoute);
+            updateProgressBar();
+            loadRoutes();
+            
+            // Prepare data for form submission
+            document.getElementById('completeRouteId').value = selectedRoute.id;
+            document.getElementById('completeRouteData').value = JSON.stringify(selectedRoute);
+            
+            // Submit form to save to history
+            document.getElementById('routeCompletionForm').submit();
+        }
+        
         // Event Listeners
         document.getElementById('startNavigation').addEventListener('click', () => {
             if (selectedRoute) {
+                if (selectedRoute.status === 'completed') {
+                    addNotification('This route has already been completed', 'warning');
+                    return;
+                }
+                
                 selectedRoute.status = 'active';
+                isNavigating = true;
+                
+                // Update UI
                 updateRouteDetails(selectedRoute);
                 loadRoutes();
+                
+                // Start or continue truck simulation
+                startTruckSimulation();
+                
                 addNotification('Navigation started for ' + selectedRoute.name, 'success');
                 
                 if (socket && socket.connected) {
@@ -1750,7 +2384,16 @@ $default_lng = 123.8854;
         
         document.getElementById('pauseNavigation').addEventListener('click', () => {
             if (selectedRoute && selectedRoute.status === 'active') {
-                addNotification('Navigation paused', 'warning');
+                isNavigating = !isNavigating;
+                
+                if (isNavigating) {
+                    addNotification('Navigation resumed', 'success');
+                    document.getElementById('trackingStatus').textContent = 'Moving';
+                    document.getElementById('trackingStatus').style.color = '#4caf50';
+                } else {
+                    addNotification('Navigation paused', 'warning');
+                    stopTruckSimulation();
+                }
                 
                 if (socket && socket.connected) {
                     socket.emit('navigation_paused', {
@@ -1763,25 +2406,7 @@ $default_lng = 123.8854;
             }
         });
         
-        document.getElementById('completeRoute').addEventListener('click', () => {
-            if (selectedRoute && selectedRoute.status === 'active') {
-                selectedRoute.status = 'completed';
-                selectedRoute.progress = 100;
-                updateRouteDetails(selectedRoute);
-                updateProgressBar();
-                loadRoutes();
-                addNotification('Route completed: ' + selectedRoute.name, 'success');
-                
-                if (socket && socket.connected) {
-                    socket.emit('route_completed', {
-                        route_id: selectedRoute.id,
-                        driver_id: <?php echo $driver_id; ?>
-                    });
-                }
-            } else {
-                addNotification('No active route to complete', 'warning');
-            }
-        });
+        document.getElementById('completeRoute').addEventListener('click', completeCurrentRoute);
         
         document.getElementById('reportIssue').addEventListener('click', () => {
             const issue = prompt('Please describe the issue:');
@@ -1818,12 +2443,27 @@ $default_lng = 123.8854;
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             requestNotificationPermission();
+            
+            // Demo: Auto-select first route
+            setTimeout(() => {
+                if (routes.length > 0) {
+                    // Simulate click on first route
+                    const firstRoute = document.querySelector('.route-item');
+                    if (firstRoute) {
+                        firstRoute.click();
+                    }
+                }
+            }, 1000);
         });
         
         // Clean up on page unload
         window.addEventListener('beforeunload', () => {
             if (watchId) {
                 navigator.geolocation.clearWatch(watchId);
+            }
+            
+            if (truckInterval) {
+                clearInterval(truckInterval);
             }
             
             if (socket) {
