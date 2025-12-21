@@ -6,9 +6,15 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     exit;
 }
 
-if(isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin'){
-    header('location: barangay_dashboard.php');
-    exit;
+if(isset($_SESSION['user_type'])){
+    if($_SESSION['user_type'] === 'admin'){
+        header('location: barangay_dashboard.php');
+        exit;
+    }
+    if($_SESSION['user_type'] === 'barangay_driver'){
+        header('location: driver_dashboard.php');
+        exit;
+    }
 }
 
 $user_id = $_SESSION["id"];
@@ -57,33 +63,17 @@ if ($stmt = $pdo->prepare($sql)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pickup Schedule - TrashTrace</title>
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/res_schedule.css">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body data-is-worker="<?php echo $user_type === 'admin' ? 'true' : 'false'; ?>"
       data-user-id="<?php echo $user_id; ?>"
       data-user-barangay="<?php echo htmlspecialchars($user_barangay); ?>"
       data-user-zone="<?php echo htmlspecialchars($user_zone); ?>">
     <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="logo">TrashTrace</div>
-              <nav>
-    <ul>
-        <li><a href="dashboard.php" class="nav-link ">Dashboard</a></li>
-        <li><a href="res_schedule.php" class="nav-link active">Schedule</a></li>
-        <li><a href="res_notif.php" class="nav-link">Notifications</a></li>
-        <li><a href="res_profile.php" class="nav-link">Profile</a></li>
-        <li class="user-menu">
-            <span>Welcome, <?php echo $_SESSION["full_name"]; ?></span>
-            <a href="logout.php" class="btn btn-outline">Logout</a>
-        </li>
-    </ul>
-</nav>
-            </div>
-        </header>
+        <?php include 'includes/header.php'; ?>
 
-        <main class="schedule-main">
+        <main class="schedule-main main-offset">
             <div class="container">
                 <div class="schedule-header">
                     <h1>Trash Pickup Schedule</h1>
@@ -111,6 +101,25 @@ if ($stmt = $pdo->prepare($sql)) {
                 </div>
                 <?php endif; ?>
 
+                <div class="schedule-legend" aria-hidden="false">
+                    <div class="legend-item">
+                        <div class="color-box scheduled" aria-hidden="true"></div>
+                        <span>Scheduled</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box completed" aria-hidden="true"></div>
+                        <span>Completed</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box delayed" aria-hidden="true"></div>
+                        <span>Delayed</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box cancelled" aria-hidden="true"></div>
+                        <span>Cancelled</span>
+                    </div>
+                </div>
+
                 <div class="calendar-container">
                     <div class="calendar-header">
                         <div class="day-header">Sun</div>
@@ -122,25 +131,6 @@ if ($stmt = $pdo->prepare($sql)) {
                         <div class="day-header">Sat</div>
                     </div>
                     <div class="calendar-body" id="calendar-body">
-                    </div>
-                </div>
-
-                <div class="schedule-legend">
-                    <div class="legend-item">
-                        <div class="color-box scheduled"></div>
-                        <span>Scheduled</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box completed"></div>
-                        <span>Completed</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box delayed"></div>
-                        <span>Delayed</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box cancelled"></div>
-                        <span>Cancelled</span>
                     </div>
                 </div>
             </div>
@@ -166,7 +156,7 @@ if ($stmt = $pdo->prepare($sql)) {
         const userId = <?php echo $user_id; ?>;
     </script>
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <script src="js/res_schedule.js"></script>
 </body>
 </html>
