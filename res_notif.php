@@ -198,385 +198,176 @@ $stats['today'] = $stats['today'] ?? 0;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifications - TrashTrace Resident</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-green: #2E7D32;
-            --light-green: #4CAF50;
-            --dark-green: #1B5E20;
-            --warning-yellow: #FFA000;
-            --danger-red: #D32F2F;
-            --gray-bg: #f5f5f5;
-            --card-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-        
-        .navbar {
-            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
-            box-shadow: 0 2px 15px rgba(46, 125, 50, 0.2);
-        }
-        
-        .notification-card {
-            background: white;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary-green);
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-            box-shadow: var(--card-shadow);
-        }
-        
-        .notification-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .notification-card.unread {
-            border-left: 4px solid var(--warning-yellow);
-            background-color: #FFF9C4;
-        }
-        
-        .notification-card.important {
-            border-left: 4px solid var(--danger-red);
-            background-color: #FFEBEE;
-        }
-        
-        .notification-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-right: 15px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stat-title {
-            font-size: 0.9rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .filter-btn {
-            border-radius: 20px;
-            padding: 8px 20px;
-            margin: 0 5px 10px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-btn.active {
-            background-color: var(--primary-green);
-            color: white;
-            border-color: var(--primary-green);
-        }
-        
-        .toast {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 1050;
-        }
-        
-        .notification-time {
-            font-size: 0.85rem;
-            color: #666;
-        }
-        
-        .action-btn {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin-left: 5px;
-        }
-        
-        .no-notifications {
-            text-align: center;
-            padding: 50px 20px;
-            color: #666;
-        }
-        
-        .no-notifications i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #ddd;
-        }
-        
-        .type-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .navbar-brand {
-            font-weight: 600;
-        }
-        
-        .nav-link.active {
-            font-weight: 500;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-        }
-    </style>
+    <title>Notifications - TrashTrace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/res_notif.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="dashboard.php">
-                <i class="fas fa-recycle me-2"></i>
-                <strong>TrashTrace</strong> Resident
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.php">
-                            <i class="fas fa-home me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="res_schedule.php">
-                            <i class="fas fa-calendar-alt me-1"></i> Schedule
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="res_notif.php">
-                            <i class="fas fa-bell me-1"></i> Notifications
-                            <?php if ($stats['unread'] > 0): ?>
-                                <span class="badge bg-danger ms-1"><?php echo $stats['unread']; ?></span>
-                            <?php endif; ?>
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i> <?php echo $_SESSION['username'] ?? 'Account'; ?>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="res_profile.php"><i class="fas fa-user-cog me-2"></i> Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include 'includes/header.php'; ?>
 
     <!-- Main Content -->
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-bell text-success me-2"></i> Notifications</h2>
-                    <form method="POST" action="" class="d-inline">
-                        <button type="submit" name="mark_all_read" class="btn btn-success btn-sm">
-                            <i class="fas fa-check-double me-1"></i> Mark All as Read
-                        </button>
-                    </form>
+    <main class="notifications-main">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="notifications-header">
+                <div class="header-content">
+                    <h1><i class="far fa-bell"></i> Notifications</h1>
+                    <p class="notifications-subtitle">Stay updated with your collection schedules and important announcements</p>
                 </div>
-                
-                <!-- Statistics Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="stat-card">
-                            <div class="stat-icon text-primary">
-                                <i class="fas fa-bell"></i>
-                            </div>
-                            <div class="stat-number"><?php echo $stats['total']; ?></div>
-                            <div class="stat-title">Total Notifications</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="stat-card">
-                            <div class="stat-icon text-warning">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div class="stat-number"><?php echo $stats['unread']; ?></div>
-                            <div class="stat-title">Unread</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="stat-card">
-                            <div class="stat-icon text-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                            </div>
-                            <div class="stat-number"><?php echo $stats['important']; ?></div>
-                            <div class="stat-title">Important</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="stat-card">
-                            <div class="stat-icon text-success">
-                                <i class="fas fa-calendar-day"></i>
-                            </div>
-                            <div class="stat-number"><?php echo $stats['today']; ?></div>
-                            <div class="stat-title">Today</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Filter Buttons -->
-                <div class="mb-4">
-                    <a href="?filter=all" class="btn btn-outline-secondary filter-btn <?php echo $filter == 'all' ? 'active' : ''; ?>">
-                        All Notifications
-                    </a>
-                    <a href="?filter=unread" class="btn btn-outline-warning filter-btn <?php echo $filter == 'unread' ? 'active' : ''; ?>">
-                        <i class="fas fa-envelope me-1"></i> Unread
-                    </a>
-                    <a href="?filter=today" class="btn btn-outline-primary filter-btn <?php echo $filter == 'today' ? 'active' : ''; ?>">
-                        <i class="fas fa-sun me-1"></i> Today
-                    </a>
-                    <a href="?filter=week" class="btn btn-outline-info filter-btn <?php echo $filter == 'week' ? 'active' : ''; ?>">
-                        <i class="fas fa-calendar-week me-1"></i> This Week
-                    </a>
-                    <a href="?filter=important" class="btn btn-outline-danger filter-btn <?php echo $filter == 'important' ? 'active' : ''; ?>">
-                        <i class="fas fa-exclamation-triangle me-1"></i> Important
-                    </a>
-                </div>
-                
-                <!-- Notifications List -->
-                <div class="card">
-                    <div class="card-body">
-                        <?php if (count($notifications) > 0): ?>
-                            <div class="notifications-list">
-                                <?php foreach ($notifications as $notification): ?>
-                                    <div class="notification-card p-3 <?php echo (!$notification['is_read']) ? 'unread' : ''; ?> <?php echo ($notification['priority'] == 'high') ? 'important' : ''; ?>">
-                                        <div class="d-flex align-items-start">
-                                            <div class="notification-icon
-                                                <?php echo $notification['type'] == 'pickup_scheduled' ? 'bg-success text-white' :
-                                                      ($notification['type'] == 'pickup_completed' ? 'bg-primary text-white' :
-                                                      ($notification['type'] == 'pickup_delayed' ? 'bg-warning text-dark' :
-                                                      ($notification['type'] == 'pickup_cancelled' ? 'bg-danger text-white' : 'bg-secondary text-white'))); ?>">
-                                                <?php if ($notification['type'] == 'pickup_scheduled'): ?>
-                                                    <i class="fas fa-truck"></i>
-                                                <?php elseif ($notification['type'] == 'pickup_completed'): ?>
-                                                    <i class="fas fa-check-circle"></i>
-                                                <?php elseif ($notification['type'] == 'pickup_delayed'): ?>
-                                                    <i class="fas fa-calendar-times"></i>
-                                                <?php elseif ($notification['type'] == 'pickup_cancelled'): ?>
-                                                    <i class="fas fa-money-bill-wave"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-bullhorn"></i>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <h5 class="mb-1"><?php echo htmlspecialchars($notification['title']); ?></h5>
-                                                        <p class="mb-2"><?php echo htmlspecialchars($notification['message']); ?></p>
-                                                        
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="type-badge
-                                                                <?php echo $notification['type'] == 'pickup_scheduled' ? 'bg-success' :
-                                                                      ($notification['type'] == 'pickup_completed' ? 'bg-primary' :
-                                                                      ($notification['type'] == 'pickup_delayed' ? 'bg-warning' :
-                                                                      ($notification['type'] == 'pickup_cancelled' ? 'bg-danger' : 'bg-secondary'))); ?> text-white me-2">
-                                                                <?php echo $notification['type_display']; ?>
-                                                            </span>
-                                                            
-                                                            <?php if (isset($notification['collector_name']) && $notification['collector_name']): ?>
-                                                                <span class="badge bg-light text-dark me-2">
-                                                                    <i class="fas fa-user-hard-hat me-1"></i> <?php echo $notification['collector_name']; ?>
-                                                                </span>
-                                                            <?php endif; ?>
-                                                            
-                                                            <span class="notification-time">
-                                                                <i class="far fa-clock me-1"></i> 
-                                                                <?php 
-                                                                    $time = strtotime($notification['created_at']);
-                                                                    $now = time();
-                                                                    $diff = $now - $time;
-                                                                    
-                                                                    if ($diff < 60) {
-                                                                        echo 'Just now';
-                                                                    } elseif ($diff < 3600) {
-                                                                        echo floor($diff / 60) . ' minutes ago';
-                                                                    } elseif ($diff < 86400) {
-                                                                        echo floor($diff / 3600) . ' hours ago';
-                                                                    } elseif ($diff < 604800) {
-                                                                        echo floor($diff / 86400) . ' days ago';
-                                                                    } else {
-                                                                        echo date('M d, Y', $time);
-                                                                    }
-                                                                ?>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex">
-                                                        <?php if (!$notification['is_read']): ?>
-                                                            <form method="POST" class="mark-read-form d-inline">
-                                                                <input type="hidden" name="notification_id" value="<?php echo $notification['id']; ?>">
-                                                                <button type="submit" name="mark_as_read" class="btn btn-success btn-sm action-btn">
-                                                                    <i class="fas fa-check me-1"></i> Mark Read
-                                                                </button>
-                                                            </form>
-                                                        <?php endif; ?>
-                                                        <form method="POST" class="delete-form d-inline ms-2">
-                                                            <input type="hidden" name="notification_id" value="<?php echo $notification['id']; ?>">
-                                                            <button type="submit" name="delete_notification" class="btn btn-outline-danger btn-sm action-btn" onclick="return confirm('Delete this notification?');">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="no-notifications">
-                                <i class="far fa-bell-slash"></i>
-                                <h4>No notifications found</h4>
-                                <p class="text-muted">You're all caught up! No notifications to display.</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                <form method="POST" action="">
+                    <button type="submit" name="mark_all_read" class="mark-all-btn">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                </form>
             </div>
-        </div>
-    </div>
 
-    <!-- Toast Container -->
-    <div id="toastContainer"></div>
+            <!-- Statistics Section -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="far fa-bell"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Total Notifications</div>
+                        <div class="stat-value"><?php echo $stats['total']; ?></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="far fa-envelope"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Unread</div>
+                        <div class="stat-value"><?php echo $stats['unread']; ?></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Important</div>
+                        <div class="stat-value"><?php echo $stats['important']; ?></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value"><?php echo $stats['today']; ?></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filter Section -->
+            <section class="filter-section">
+                <div class="filter-buttons">
+                    <a href="?filter=all" class="filter-btn <?php echo $filter == 'all' ? 'active' : ''; ?>">
+                        <i class="fas fa-list"></i> All
+                    </a>
+                    <a href="?filter=unread" class="filter-btn <?php echo $filter == 'unread' ? 'active' : ''; ?>">
+                        <i class="far fa-envelope"></i> Unread
+                    </a>
+                    <a href="?filter=today" class="filter-btn <?php echo $filter == 'today' ? 'active' : ''; ?>">
+                        <i class="far fa-calendar"></i> Today
+                    </a>
+                    <a href="?filter=week" class="filter-btn <?php echo $filter == 'week' ? 'active' : ''; ?>">
+                        <i class="far fa-calendar-week"></i> Week
+                    </a>
+                    <a href="?filter=important" class="filter-btn <?php echo $filter == 'important' ? 'active' : ''; ?>">
+                        <i class="fas fa-star"></i> Important
+                    </a>
+                </div>
+            </section>
+
+            <!-- Notifications List -->
+            <?php if (count($notifications) > 0): ?>
+                <div class="notifications-list">
+                    <?php foreach ($notifications as $notification): ?>
+                        <div class="notification-card <?php echo (!$notification['is_read']) ? 'unread' : ''; ?> <?php echo ($notification['priority'] == 'high') ? 'important' : ''; ?>">
+                            <div class="notif-icon <?php 
+                                if ($notification['type'] == 'pickup_scheduled') echo 'blue';
+                                elseif ($notification['type'] == 'pickup_completed') echo 'green';
+                                elseif ($notification['type'] == 'pickup_delayed') echo 'orange';
+                                elseif ($notification['type'] == 'pickup_cancelled') echo 'red';
+                                else echo 'gray';
+                            ?>">
+                                <?php if ($notification['type'] == 'pickup_scheduled'): ?>
+                                    <i class="fa-solid fa-truck"></i>
+                                <?php elseif ($notification['type'] == 'pickup_completed'): ?>
+                                    <i class="fa-solid fa-circle-check"></i>
+                                <?php elseif ($notification['type'] == 'pickup_delayed'): ?>
+                                    <i class="fa-solid fa-calendar-xmark"></i>
+                                <?php elseif ($notification['type'] == 'pickup_cancelled'): ?>
+                                    <i class="fa-solid fa-xmark"></i>
+                                <?php else: ?>
+                                    <i class="fa-solid fa-bullhorn"></i>
+                                <?php endif; ?>
+                            </div>
+                            <div class="notif-content">
+                                <div class="notif-header">
+                                    <h3 class="notif-title">
+                                        <?php echo htmlspecialchars($notification['title']); ?>
+                                    </h3>
+                                    <span class="type-badge"><?php echo $notification['type_display']; ?></span>
+                                </div>
+                                <p class="notif-message"><?php echo htmlspecialchars($notification['message']); ?></p>
+                                <div class="notif-footer">
+                                    <span class="notif-time">
+                                        <i class="far fa-clock"></i>
+                                        <?php 
+                                            $time = strtotime($notification['created_at']);
+                                            $now = time();
+                                            $diff = $now - $time;
+                                            
+                                            if ($diff < 60) {
+                                                echo 'Just now';
+                                            } elseif ($diff < 3600) {
+                                                echo floor($diff / 60) . ' minutes ago';
+                                            } elseif ($diff < 86400) {
+                                                echo floor($diff / 3600) . ' hours ago';
+                                            } elseif ($diff < 604800) {
+                                                echo floor($diff / 86400) . ' days ago';
+                                            } else {
+                                                echo date('M d, Y', $time);
+                                            }
+                                        ?>
+                                    </span>
+                                    <div class="notif-actions">
+                                        <?php if (!$notification['is_read']): ?>
+                                            <form method="POST" class="mark-read-form">
+                                                <input type="hidden" name="notification_id" value="<?php echo $notification['id']; ?>">
+                                                <button type="submit" name="mark_as_read" class="action-btn read-btn">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form method="POST" class="delete-form">
+                                            <input type="hidden" name="notification_id" value="<?php echo $notification['id']; ?>">
+                                            <button type="submit" name="delete_notification" class="action-btn delete-btn" onclick="return confirm('Delete this notification?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="no-notifications">
+                    <i class="far fa-bell-slash"></i>
+                    <h3>No notifications found</h3>
+                    <p>You're all caught up! No notifications to display.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </main>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -595,8 +386,10 @@ $stats['today'] = $stats['today'] ?? 0;
                         if (response.success) {
                             notificationCard.removeClass('unread');
                             form.remove();
-                            showToast('Marked as read!', 'success');
-                            updateNotificationCount();
+                            // Reload to update stats
+                            setTimeout(function() {
+                                location.reload();
+                            }, 500);
                         }
                     }
                 });
@@ -626,85 +419,10 @@ $stats['today'] = $stats['today'] ?? 0;
                                     location.reload();
                                 }
                             });
-                            showToast('Notification deleted!', 'success');
-                            updateNotificationCount();
                         }
                     }
                 });
             });
-            
-            // Show toast message
-            function showToast(message, type) {
-                var toast = $(`
-                    <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
-                                ${message}
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    </div>
-                `);
-                
-                $('#toastContainer').append(toast);
-                var bsToast = new bootstrap.Toast(toast[0]);
-                bsToast.show();
-                
-                toast.on('hidden.bs.toast', function() {
-                    $(this).remove();
-                });
-            }
-            
-            // Update notification count in navbar
-            function updateNotificationCount() {
-                // Reload the stats section
-                location.reload();
-            }
-            
-    // Check for success messages in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('success')) {
-        if (urlParams.get('success') === 'marked_all') {
-            showToast('All notifications marked as read!', 'success');
-            // Remove parameter from URL without reload
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    }
-
-    // Real-time notifications polling
-    let lastNotificationCount = <?php echo $stats['total']; ?>;
-    function checkForNewNotifications() {
-        fetch('php/check_new_notifications.php', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.new_count > 0) {
-                // Update notification count in navbar
-                const badge = document.querySelector('.nav-link.active .badge');
-                if (badge) {
-                    const currentCount = parseInt(badge.textContent) || 0;
-                    badge.textContent = currentCount + data.new_count;
-                }
-                // Optionally show a toast for new notifications
-                showToast(`You have ${data.new_count} new notification(s)!`, 'info');
-                // Refresh the page to show new notifications
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
-            }
-        })
-        .catch(error => {
-            console.log('Error checking for new notifications:', error);
-        });
-    }
-
-    // Check for new notifications every 30 seconds
-    setInterval(checkForNewNotifications, 30000);
         });
     </script>
 </body>

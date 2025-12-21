@@ -29,31 +29,19 @@ if($stmt = $pdo->prepare($sql)){
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Notifications - Barangay - TrashTrace</title>
-    <link rel="stylesheet" href="css/barangay_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/barangay_notifications.css">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="logo">TrashTrace</div>
-                <nav>
-                    <ul>
-                        <li><a href="barangay_dashboard.php" class="nav-link">Dashboard</a></li>
-                        <li><a href="barangay_schedule.php" class="nav-link">Schedule</a></li>
-                        <li><a href="barangay_applications.php" class="nav-link">Applications</a></li>
-                        <li><a href="barangay_notifications.php" class="nav-link active">Notifications</a></li>
-                        <li><a href="barangay_reports.php" class="nav-link">Reports</a></li>
-                        <li class="user-menu"><span>Welcome, <?php echo htmlspecialchars($_SESSION['full_name'] ?? ''); ?></span><a href="logout.php" class="btn btn-outline">Logout</a></li>
-                    </ul>
-                </nav>
+    <?php include 'includes/header.php'; ?>
+    
+    <main class="dashboard-main">
+        <div class="container">
+            <div class="notifications-header-section">
+                <h1><i class="far fa-bell"></i> Notifications</h1>
+                <p class="notifications-subtitle">Stay updated with important barangay updates</p>
             </div>
-        </header>
-
-        <main class="dashboard-main page-transition">
-            <div class="container">
-                <h1 class="welcome-title">Notifications</h1>
                 <div class="notifications-actions" style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
                     <button id="mark-all-read-b" class="btn">Mark All as Read</button>
                     <button id="refresh-notifs-b" class="btn btn-outline">Refresh</button>
@@ -81,10 +69,8 @@ if($stmt = $pdo->prepare($sql)){
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
-            </div>
-        </main>
-        
-    </div>
+        </div>
+    </main>
 
     <script src="js/barangay_dashboard.js"></script>
     <script src="js/barangay_notifications.js"></script>

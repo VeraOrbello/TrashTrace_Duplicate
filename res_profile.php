@@ -118,172 +118,188 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["change_password"])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - TrashTrace</title>
-    <link rel="stylesheet" href="css/res_profile.css">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/res_profile.css">
 </head>
 <body>
     <div class="profile-container">
-        <header class="profile-header">
-            <div class="header-content">
-                <div class="logo">TrashTrace</div>
-                <nav>
-                    <ul>
-                        <li><a href="dashboard.php" class="nav-link">Dashboard</a></li>
-                        <li><a href="res_schedule.php" class="nav-link">Schedule</a></li>
-                        <li><a href="res_notif.php" class="nav-link">Notifications</a></li>
-                        <li><a href="res_profile.php" class="nav-link active">Profile</a></li>
-                        <li class="user-menu">
-                            <span>Welcome, <?php echo $_SESSION["full_name"]; ?></span>
-                            <a href="logout.php" class="btn btn-outline">Logout</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+        <?php include 'includes/header.php'; ?>
 
         <main class="profile-main">
             <div class="container">
-                <h1 class="page-title">Profile Settings</h1>
+                <div class="profile-header">
+                    <h1><i class="fas fa-user-circle"></i> Profile Settings</h1>
+                    <p class="profile-subtitle">Manage your account and preferences</p>
+                </div>
                 
                 <?php if($update_success): ?>
                 <div class="alert alert-success">
-                    Profile updated successfully!
+                    <i class="fas fa-check-circle"></i> Profile updated successfully!
                 </div>
                 <?php endif; ?>
                 
                 <?php if($password_success): ?>
                 <div class="alert alert-success">
-                    Password changed successfully!
+                    <i class="fas fa-check-circle"></i> Password changed successfully!
                 </div>
                 <?php endif; ?>
                 
                 <div class="profile-grid">
-                    <div class="profile-card personal-info">
-                        <h2>Personal Information</h2>
-                        <form method="POST" class="profile-form">
-                            <input type="hidden" name="update_profile" value="1">
-                            
-                            <div class="form-group">
-                                <label for="full_name">Full Name</label>
-                                <input type="text" id="full_name" name="full_name" 
-                                       value="<?php echo htmlspecialchars($user_data['full_name'] ?? ''); ?>" 
-                                       required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="mobile_number">Mobile Number</label>
-                                <input type="tel" id="mobile_number" name="mobile_number" 
-                                       value="<?php echo htmlspecialchars($user_data['mobile_number'] ?? ''); ?>">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="city">City</label>
-                                <select id="city" name="city" class="form-control" required>
-                                    <option value="">Select City</option>
-                                    <option value="CEBU CITY" <?php echo ($user_data['city'] ?? '') == 'CEBU CITY' ? 'selected' : ''; ?>>Cebu City</option>
-                                    <option value="MANDAUE CITY" <?php echo ($user_data['city'] ?? '') == 'MANDAUE CITY' ? 'selected' : ''; ?>>Mandaue City</option>
-                                    <option value="LAPU-LAPU CITY" <?php echo ($user_data['city'] ?? '') == 'LAPU-LAPU CITY' ? 'selected' : ''; ?>>Lapu-Lapu City</option>
-                                    <option value="TALISAY CITY" <?php echo ($user_data['city'] ?? '') == 'TALISAY CITY' ? 'selected' : ''; ?>>Talisay City</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="barangay">Barangay</label>
-                                <select id="barangay" name="barangay" class="form-control" required>
-                                    <option value="">Select Barangay</option>
-                                    <?php if(isset($user_data['city']) && isset($cebuBarangays[$user_data['city']])): ?>
-                                        <?php foreach($cebuBarangays[$user_data['city']] as $brgy): ?>
-                                            <option value="<?php echo $brgy; ?>" 
-                                                <?php echo ($user_data['barangay'] ?? '') == $brgy ? 'selected' : ''; ?>>
-                                                <?php echo $brgy; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="zone">Zone/Purok</label>
-                                <input type="text" id="zone" name="zone" 
-                                       value="<?php echo htmlspecialchars($user_data['zone'] ?? ''); ?>">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="address">House No., Street Name</label>
-                                <input type="text" id="address" name="address" 
-                                       value="<?php echo htmlspecialchars($user_data['address'] ?? ''); ?>">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="notification_channel">Notification Channel</label>
-                                <select id="notification_channel" name="notification_channel" required>
-                                    <option value="Email" <?php echo ($user_data['notification_channel'] ?? '') == 'Email' ? 'selected' : ''; ?>>Email</option>
-                                    <option value="SMS" <?php echo ($user_data['notification_channel'] ?? '') == 'SMS' ? 'selected' : ''; ?>>SMS</option>
-                                    <option value="Both" <?php echo ($user_data['notification_channel'] ?? '') == 'Both' ? 'selected' : ''; ?>>Both</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Update Profile</button>
-                        </form>
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-id-card"></i> Personal Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" class="profile-form">
+                                <input type="hidden" name="update_profile" value="1">
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="full_name"><i class="fas fa-user"></i> Full Name</label>
+                                        <input type="text" id="full_name" name="full_name" 
+                                               value="<?php echo htmlspecialchars($user_data['full_name'] ?? ''); ?>" 
+                                               required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="mobile_number"><i class="fas fa-phone"></i> Mobile Number</label>
+                                        <input type="tel" id="mobile_number" name="mobile_number" 
+                                               value="<?php echo htmlspecialchars($user_data['mobile_number'] ?? ''); ?>">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city"><i class="fas fa-city"></i> City</label>
+                                        <select id="city" name="city" class="form-control" required>
+                                            <option value="">Select City</option>
+                                            <option value="CEBU CITY" <?php echo ($user_data['city'] ?? '') == 'CEBU CITY' ? 'selected' : ''; ?>>Cebu City</option>
+                                            <option value="MANDAUE CITY" <?php echo ($user_data['city'] ?? '') == 'MANDAUE CITY' ? 'selected' : ''; ?>>Mandaue City</option>
+                                            <option value="LAPU-LAPU CITY" <?php echo ($user_data['city'] ?? '') == 'LAPU-LAPU CITY' ? 'selected' : ''; ?>>Lapu-Lapu City</option>
+                                            <option value="TALISAY CITY" <?php echo ($user_data['city'] ?? '') == 'TALISAY CITY' ? 'selected' : ''; ?>>Talisay City</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="barangay"><i class="fas fa-map-marker-alt"></i> Barangay</label>
+                                        <select id="barangay" name="barangay" class="form-control" required>
+                                            <option value="">Select Barangay</option>
+                                            <?php if(isset($user_data['city']) && isset($cebuBarangays[$user_data['city']])): ?>
+                                                <?php foreach($cebuBarangays[$user_data['city']] as $brgy): ?>
+                                                    <option value="<?php echo $brgy; ?>" 
+                                                        <?php echo ($user_data['barangay'] ?? '') == $brgy ? 'selected' : ''; ?>>
+                                                        <?php echo $brgy; ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="zone"><i class="fas fa-home"></i> Zone/Purok</label>
+                                        <input type="text" id="zone" name="zone" 
+                                               value="<?php echo htmlspecialchars($user_data['zone'] ?? ''); ?>">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="address"><i class="fas fa-road"></i> House No., Street Name</label>
+                                        <input type="text" id="address" name="address" 
+                                               value="<?php echo htmlspecialchars($user_data['address'] ?? ''); ?>">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="notification_channel"><i class="fas fa-bell"></i> Notification Channel</label>
+                                    <select id="notification_channel" name="notification_channel" required>
+                                        <option value="Email" <?php echo ($user_data['notification_channel'] ?? '') == 'Email' ? 'selected' : ''; ?>>Email</option>
+                                        <option value="SMS" <?php echo ($user_data['notification_channel'] ?? '') == 'SMS' ? 'selected' : ''; ?>>SMS</option>
+                                        <option value="Both" <?php echo ($user_data['notification_channel'] ?? '') == 'Both' ? 'selected' : ''; ?>>Both</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Update Profile
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     
-                    <div class="profile-card password-change">
-                        <h2>Change Password</h2>
-                        <form method="POST" class="password-form">
-                            <input type="hidden" name="change_password" value="1">
-                            
-                            <div class="form-group">
-                                <label for="current_password">Current Password</label>
-                                <input type="password" id="current_password" name="current_password" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="new_password">New Password</label>
-                                <input type="password" id="new_password" name="new_password" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="confirm_password">Confirm New Password</label>
-                                <input type="password" id="confirm_password" name="confirm_password" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Change Password</button>
-                        </form>
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-lock"></i> Change Password</h2>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" class="password-form">
+                                <input type="hidden" name="change_password" value="1">
+                                
+                                <div class="form-group">
+                                    <label for="current_password"><i class="fas fa-key"></i> Current Password</label>
+                                    <input type="password" id="current_password" name="current_password" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="new_password"><i class="fas fa-lock"></i> New Password</label>
+                                    <input type="password" id="new_password" name="new_password" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="confirm_password"><i class="fas fa-check-circle"></i> Confirm New Password</label>
+                                    <input type="password" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-shield-alt"></i> Change Password
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     
-                    <div class="profile-card worker-registration">
-                        <h2>Application Status</h2>
-                        <div class="worker-info">
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-clipboard-check"></i> Application Status</h2>
+                        </div>
+                        <div class="card-body">
                             <?php if($admin_application_status == 'pending'): ?>
                             <div class="worker-status pending">
-                                <i class="fas fa-user-shield"></i>
-                                <h3>Application Status: Pending</h3>
-                                <p>Your admin application has been submitted and is awaiting review by barangay administrators.</p>
-                                <div class="status-details">
-                                    <p><strong>Applied:</strong> <?php echo date('M d, Y', strtotime($user_data['created_at'])); ?></p>
-                                    <p><strong>Status:</strong> <span class="status-badge pending-badge">Pending Review</span></p>
+                                <div class="status-icon pending-icon">
+                                    <i class="fas fa-user-shield"></i>
                                 </div>
-                                <p class="status-note">We will contact you via email or phone once your application is processed.</p>
+                                <h3>Application Pending</h3>
+                                <p>Your admin application is awaiting review by barangay administrators.</p>
+                                <div class="status-details">
+                                    <div class="detail-item">
+                                        <i class="far fa-calendar"></i>
+                                        <span><strong>Applied:</strong> <?php echo date('M d, Y', strtotime($user_data['created_at'])); ?></span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span><strong>Status:</strong> <span class="status-badge pending-badge">Pending Review</span></span>
+                                    </div>
+                                </div>
+                                <p class="status-note"><i class="fas fa-exclamation-circle"></i> We will contact you via email or phone once your application is processed.</p>
                             </div>
                             <?php else: ?>
                             <div class="worker-status not-applied">
-                                <i class="fas fa-user-clock"></i>
-                                <h3>Application Status: Regular User</h3>
-                                <p>You are currently a regular user. To become a barangay administrator, you need to register and get approved.</p>
-                                <p>Barangay administrators can manage schedules, approve applications, and oversee waste management operations.</p>
+                                <div class="status-icon regular-icon">
+                                    <i class="fas fa-user-clock"></i>
+                                </div>
+                                <h3>Regular User</h3>
+                                <p>To become a barangay administrator, register and get approved.</p>
                                 <div class="benefits">
-                                    <h4>Admin Benefits:</h4>
+                                    <h4><i class="fas fa-star"></i> Admin Benefits:</h4>
                                     <ul>
-                                        <li>Access to barangay dashboard</li>
-                                        <li>Manage pickup schedules</li>
-                                        <li>Approve worker/driver applications</li>
-                                        <li>Generate reports and analytics</li>
-                                        <li>Oversee waste management operations</li>
+                                        <li><i class="fas fa-check"></i> Access to barangay dashboard</li>
+                                        <li><i class="fas fa-check"></i> Manage pickup schedules</li>
+                                        <li><i class="fas fa-check"></i> Approve worker/driver applications</li>
+                                        <li><i class="fas fa-check"></i> Generate reports and analytics</li>
+                                        <li><i class="fas fa-check"></i> Oversee waste management operations</li>
                                     </ul>
                                 </div>
                                 <a href="barangay_register.php" class="btn btn-worker">
-                                    <i class="fas fa-user-shield"></i> Register as Admin
+                                    <i class="fas fa-user-plus"></i> Register as Admin
                                 </a>
                             </div>
                             <?php endif; ?>

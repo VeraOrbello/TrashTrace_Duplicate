@@ -114,148 +114,234 @@ foreach($notifications as $notification) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barangay Dashboard - TrashTrace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/barangay_dashboard.css">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="logo">TrashTrace</div>
-                <nav>
-                    <ul>
-                        <li><a href="barangay_dashboard.php" class="nav-link active">Dashboard</a></li>
-                        <li><a href="barangay_schedule.php" class="nav-link">Schedule</a></li>
-                        <li>
-                            <a href="barangay_applications.php" class="nav-link">Applications</a>
-                        </li>
-                        <li>
-                            <a href="barangay_notifications.php" class="nav-link">Notifications</a>
-                        </li>
-                        <li><a href="barangay_reports.php" class="nav-link">Reports</a></li>
-                        <li class="user-menu">
-                            <span>Welcome, <?php echo htmlspecialchars($user_name); ?></span>
-                            <a href="logout.php" class="btn btn-outline">Logout</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+    <?php include 'includes/header.php'; ?>
 
-        <main class="dashboard-main">
-            <div class="container">
-                <h1 class="welcome-title">Welcome back, <?php echo htmlspecialchars($user_name); ?></h1>
-                
-                <div class="dashboard-grid">
-                    <div class="dashboard-card upcoming-pickup">
-                        <h2>Today's Pickups</h2>
-                        <div class="pickup-info">
-                            <div class="pickup-date">
-                                <h3>Pickup Statistics</h3>
-                                <p class="date"><?php echo date('l, F j'); ?></p>
-                                <p class="waste-type">Total: <?php echo $todays_stats['total']; ?> | Completed: <?php echo $todays_stats['completed']; ?> | Delayed: <?php echo $todays_stats['delayed']; ?></p>
-                            </div>
-                            <a href="barangay_schedule.php" class="view-details">Manage Schedule</a>
-                        </div>
+    <main class="dashboard-main">
+        <div class="container">
+            <div class="dashboard-header-section">
+                <h1><i class="fas fa-tachometer-alt"></i> Worker Dashboard</h1>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e3f2fd; color: #1976d2;">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
-                    
-                    <div class="dashboard-card pickup-status">
-                        <h2>Pickup Status</h2>
-                        <p id="pickupStatusText"><?php echo $pickup_status; ?></p>
+                    <div class="stat-info">
+                        <h3><?php echo $todays_stats['total']; ?></h3>
+                        <p>Today's Pickups</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e8f5e9; color: #4caf50;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $todays_stats['completed']; ?></h3>
+                        <p>Completed</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff3e0; color: #ff9800;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $todays_stats['delayed']; ?></h3>
+                        <p>Delayed</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f3e5f5; color: #9c27b0;">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo $pending_applications; ?></h3>
+                        <p>Pending Applications</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Grid -->
+            <div class="dashboard-grid">
+                <!-- Pickup Progress Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Today's Progress</h2>
+                        <span class="badge"><?php echo $completion_percentage; ?>%</span>
+                    </div>
+                    <div class="card-body">
                         <?php if($todays_stats['total'] > 0): ?>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progressFill" style="width: <?php echo $completion_percentage; ?>%"></div>
+                        <div class="progress-stats-row">
+                            <div class="progress-stat">
+                                <div class="stat-value"><?php echo $todays_stats['total']; ?></div>
+                                <div class="stat-label">Total</div>
                             </div>
-                            <span class="progress-text" id="progressText"><?php echo $completion_percentage; ?>% of today's pickups completed.</span>
+                            <div class="progress-stat">
+                                <div class="stat-value" style="color: #4caf50;"><?php echo $todays_stats['completed']; ?></div>
+                                <div class="stat-label">Done</div>
+                            </div>
+                            <div class="progress-stat">
+                                <div class="stat-value" style="color: #ff9800;"><?php echo $todays_stats['delayed']; ?></div>
+                                <div class="stat-label">Delayed</div>
+                            </div>
+                            <div class="progress-stat">
+                                <div class="stat-value" style="color: #2196f3;"><?php echo $todays_stats['total'] - $todays_stats['completed'] - $todays_stats['delayed']; ?></div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: <?php echo $completion_percentage; ?>%"><?php echo $completion_percentage; ?>%</div>
+                        </div>
+                        <p class="progress-text"><?php echo date('l, F j, Y'); ?></p>
+                        <?php else: ?>
+                        <div class="no-items">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No pickups scheduled for today</p>
+                            <a href="barangay_schedule.php" class="btn-primary">Schedule Now</a>
                         </div>
                         <?php endif; ?>
-                        <div id="liveUpdateIndicator" class="live-indicator" style="display: none;">
-                            <span class="live-dot"></span> Live updating...
-                        </div>
                     </div>
-                    
-                    <div class="dashboard-card notifications">
-                        <h2>Recent Notifications</h2>
-                        <div class="notification-list" id="notificationList">
+                </div>
+                
+                <!-- Upcoming Schedule Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="far fa-calendar"></i> Upcoming Pickup</h2>
+                    </div>
+                    <div class="card-body">
+                        <?php if($upcoming_pickup): ?>
+                        <div class="upcoming-schedule-card">
+                            <div class="schedule-date-badge" style="background: linear-gradient(135deg, #4caf7d 0%, #45a070 100%);">
+                                <div class="day"><?php echo date('d', strtotime($upcoming_pickup['schedule_date'])); ?></div>
+                                <div class="month"><?php echo strtoupper(date('M', strtotime($upcoming_pickup['schedule_date']))); ?></div>
+                            </div>
+                            <div class="schedule-info">
+                                <h3><?php echo date('l', strtotime($upcoming_pickup['schedule_date'])); ?></h3>
+                                <p class="schedule-date"><?php echo date('F j, Y', strtotime($upcoming_pickup['schedule_date'])); ?></p>
+                                <div class="schedule-meta">
+                                    <span class="meta-item"><i class="fas fa-map-marker-alt"></i> <?php echo $upcoming_pickup['zone'] ?? 'All Zones'; ?></span>
+                                    <span class="meta-item"><i class="fas fa-clock"></i> <?php echo date('g:i A', strtotime($upcoming_pickup['schedule_time'] ?? '08:00:00')); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php else: ?>
+                        <div class="no-items">
+                            <i class="fas fa-calendar-plus"></i>
+                            <p>No upcoming pickups scheduled</p>
+                        </div>
+                        <?php endif; ?>
+                        <a href="barangay_schedule.php" class="view-all">View Full Schedule <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Recent Notifications Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="far fa-bell"></i> Recent Notifications</h2>
+                        <?php if($unread_count > 0): ?>
+                        <span class="badge"><?php echo $unread_count; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-body">
+                        <div class="notification-list">
                             <?php if(!empty($notifications)): ?>
-                                <?php foreach($notifications as $notification): ?>
-                                <div class="notification-item <?php echo (isset($notification['is_read']) && $notification['is_read'] == 0) ? 'unread' : ''; ?>" 
-                                     data-id="<?php echo $notification['id'] ?? ''; ?>">
-                                    <div class="notification-icon">
-                                        <?php
-                                        $icon = '📢';
+                                <?php foreach($notifications as $index => $notification): 
+                                    if($index >= 4) break; // Show only 4 notifications
+                                ?>
+                                <div class="notification-item">
+                                    <div class="notif-icon <?php 
                                         if(isset($notification['type'])) {
                                             switch($notification['type']) {
-                                                case 'pickup_scheduled': $icon = '📅'; break;
-                                                case 'pickup_completed': $icon = '✅'; break;
-                                                case 'pickup_delayed': $icon = '⚠️'; break;
-                                                case 'pickup_cancelled': $icon = '❌'; break;
-                                                case 'emergency': $icon = '🚨'; break;
-                                                default: $icon = '📢';
+                                                case 'pickup_completed': echo 'success'; break;
+                                                case 'pickup_delayed': 
+                                                case 'emergency': echo 'warning'; break;
+                                                default: echo 'info';
                                             }
                                         }
-                                        echo $icon;
-                                        ?>
+                                    ?>">
+                                        <i class="<?php 
+                                            if(isset($notification['type'])) {
+                                                switch($notification['type']) {
+                                                    case 'pickup_scheduled': echo 'fas fa-calendar-check'; break;
+                                                    case 'pickup_completed': echo 'fas fa-check-circle'; break;
+                                                    case 'pickup_delayed': echo 'fas fa-exclamation-triangle'; break;
+                                                    case 'pickup_cancelled': echo 'fas fa-times-circle'; break;
+                                                    case 'emergency': echo 'fas fa-exclamation-circle'; break;
+                                                    default: echo 'fas fa-bell';
+                                                }
+                                            } else {
+                                                echo 'fas fa-bell';
+                                            }
+                                        ?>"></i>
                                     </div>
-                                    <div class="notification-content">
+                                    <div class="notif-content <?php echo (isset($notification['is_read']) && $notification['is_read'] == 0) ? 'unread' : ''; ?>">
                                         <h4><?php echo htmlspecialchars($notification['title']); ?></h4>
-                                        <p><?php echo htmlspecialchars($notification['message']); ?></p>
-                                        <small><?php echo date('F j, Y, g:i A', strtotime($notification['created_at'])); ?></small>
+                                        <p><?php echo htmlspecialchars(substr($notification['message'], 0, 60)) . (strlen($notification['message']) > 60 ? '...' : ''); ?></p>
+                                        <span class="notif-time"><?php echo date('M j, g:i A', strtotime($notification['created_at'])); ?></span>
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <div class="no-notifications">
-                                    <p>No notifications from the past week.</p>
+                                <div class="no-items">
+                                    <i class="far fa-bell-slash"></i>
+                                    <p>No recent notifications</p>
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <a href="barangay_notifications.php" class="view-all">View All Notifications</a>
-                    </div>
-                    
-                                    <!-- Modify this section in barangay_dashboard.php -->
-                <div class="dashboard-card pending-applications">
-                    <h2>Worker Applications</h2>
-                    <div class="applications-info">
-                        <div class="applications-count">
-                            <h3>Pending Validation</h3>
-                            <p class="count" id="applicationsCount"><?php echo $pending_applications; ?> pending</p>
-                            <?php if($pending_applications > 0): ?>
-                            <div class="application-types">
-                                <small>New worker applications awaiting review</small>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        <a href="barangay_applications.php" class="btn btn-primary">
-                            <?php echo $pending_applications > 0 ? 'Review Now' : 'View Applications'; ?>
-                        </a>
+                        <a href="barangay_notifications.php" class="view-all">View All Notifications <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
-                    
-                    <div class="dashboard-card upcoming-schedule">
-                        <h2>Upcoming Schedule</h2>
-                        <div class="schedule-info">
-                            <?php if($upcoming_pickup): ?>
-                                <div class="schedule-date">
-                                    <h3>Next Pickup</h3>
-                                    <p class="date"><?php echo date('l, F j', strtotime($upcoming_pickup['schedule_date'])); ?></p>
-                                    <p class="waste-type">Zone: <?php echo $upcoming_pickup['zone'] ?? 'All Zones'; ?></p>
+                
+                <!-- Applications Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-check"></i> Applications</h2>
+                        <?php if($pending_applications > 0): ?>
+                        <span class="badge-warning"><?php echo $pending_applications; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-body">
+                        <div class="app-summary-grid">
+                            <div class="app-summary-item">
+                                <div class="app-icon" style="background: #fff3e0; color: #ff9800;">
+                                    <i class="fas fa-hourglass-half"></i>
                                 </div>
-                                <a href="barangay_schedule.php" class="view-details">View Details</a>
-                            <?php else: ?>
-                                <div class="schedule-date">
-                                    <h3>No Upcoming Pickups</h3>
-                                    <p class="date">Schedule a pickup</p>
+                                <div class="app-info">
+                                    <div class="app-count"><?php echo $pending_applications; ?></div>
+                                    <div class="app-label">Pending</div>
                                 </div>
-                                <a href="barangay_schedule.php" class="view-details">Create Schedule</a>
-                            <?php endif; ?>
+                            </div>
+                            <div class="app-summary-item">
+                                <div class="app-icon" style="background: #e3f2fd; color: #2196f3;">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="app-info">
+                                    <div class="app-count">--</div>
+                                    <div class="app-label">In Review</div>
+                                </div>
+                            </div>
                         </div>
+                        <?php if($pending_applications > 0): ?>
+                        <a href="barangay_applications.php" class="btn-primary">
+                            <i class="fas fa-eye"></i> Review Applications
+                        </a>
+                        <?php else: ?>
+                        <a href="barangay_applications.php" class="view-all">View All Applications <i class="fas fa-arrow-right"></i></a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
+            </div>
+    </main>
     
     <script>
         // Fetch real-time collection stats from Node.js API
