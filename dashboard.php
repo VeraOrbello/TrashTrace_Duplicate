@@ -69,118 +69,214 @@ foreach($notifications as $notification) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - TrashTrace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/user_actions.css">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    
 </head>
 <body>
     <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="logo">TrashTrace</div>
-                <nav>
-    <ul>
-        <li><a href="dashboard.php" class="nav-link active">Dashboard</a></li>
-        <li><a href="res_schedule.php" class="nav-link">Schedule</a></li>
-        <li>
-            <a href="res_notif.php" class="nav-link">Notifications</a>
-        </li>
-        <li><a href="res_profile.php" class="nav-link">Profile</a></li>
-        <li class="user-menu">
-            <span>Welcome, <?php echo htmlspecialchars($_SESSION["full_name"]); ?></span>
-            <a href="logout.php" class="btn btn-outline">Logout</a>
-        </li>
-    </ul>
-</nav>
-            </div>
-        </header>
+        <?php include 'includes/header.php'; ?>
 
         <main class="dashboard-main">
             <div class="container">
-                <h1 class="welcome-title">Welcome back, <?php echo htmlspecialchars($_SESSION["full_name"]); ?></h1>
+                <div class="dashboard-header-section">
+                    <div class="header-left">
+                        <h1 class="welcome-title">Welcome back, <?php echo htmlspecialchars($_SESSION["full_name"]); ?></h1>
+                        <p class="welcome-subtitle">Here's what's happening with your waste management</p>
+                    </div>
+                </div>
                 
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">Next Pickup</span>
+                            <span class="stat-value">
+                                <?php if($upcoming_pickup): ?>
+                                    <?php echo date('M j', strtotime($upcoming_pickup['schedule_date'])); ?>
+                                <?php else: ?>
+                                    Not Scheduled
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">Notifications</span>
+                            <span class="stat-value"><?php echo $unread_count; ?> New</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value"><?php echo $upcoming_pickup ? 'Scheduled' : 'Pending'; ?></span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="stat-details">
+                            <span class="stat-label">Location</span>
+                            <span class="stat-value"><?php echo htmlspecialchars($user_barangay); ?></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Content Grid -->
                 <div class="dashboard-grid">
-                    <div class="dashboard-card upcoming-pickup">
-                        <h2>Upcoming Pickup</h2>
-                        <div class="pickup-info">
+                    <!-- Upcoming Pickup Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-calendar-alt"></i> Upcoming Pickup</h2>
+                        </div>
+                        <div class="card-body">
                             <?php if($upcoming_pickup): ?>
-                                <div class="pickup-date">
-                                    <h3>Next Pickup</h3>
-                                    <p class="date"><?php echo date('l, F j', strtotime($upcoming_pickup['schedule_date'])); ?></p>
-                                    <p class="waste-type">Waste Type: Mixed Waste</p>
+                                <div class="pickup-details">
+                                    <div class="pickup-date-display">
+                                        <div class="date-circle">
+                                            <span class="day"><?php echo date('d', strtotime($upcoming_pickup['schedule_date'])); ?></span>
+                                            <span class="month"><?php echo date('M', strtotime($upcoming_pickup['schedule_date'])); ?></span>
+                                        </div>
+                                        <div class="date-info">
+                                            <h3><?php echo date('l, F j, Y', strtotime($upcoming_pickup['schedule_date'])); ?></h3>
+                                            <p class="waste-type"><i class="fas fa-trash"></i> Mixed Waste Collection</p>
+                                        </div>
+                                    </div>
+                                    <div class="pickup-meta">
+                                        <div class="meta-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span><?php echo htmlspecialchars($user_barangay); ?></span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Morning Schedule</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <a href="res_schedule.php" class="view-details">View Details</a>
+                                <a href="res_schedule.php" class="card-link">View Full Schedule <i class="fas fa-arrow-right"></i></a>
                             <?php else: ?>
-                                <div class="pickup-date">
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-times"></i>
                                     <h3>No Upcoming Pickups</h3>
-                                    <p class="date">Check schedule for updates</p>
+                                    <p>Check the schedule page for future pickups</p>
+                                    <a href="res_schedule.php" class="btn-secondary">View Schedule</a>
                                 </div>
-                                <a href="res_schedule.php" class="view-details">View Schedule</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <!-- Pickup Status Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-truck-loading"></i> Pickup Status</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-display">
+                                <div class="status-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <p class="status-text"><?php echo $pickup_status; ?></p>
+                            </div>
+                            <?php if($upcoming_pickup): ?>
+                            <div class="progress-section">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: <?php echo $progress_percentage; ?>%"></div>
+                                </div>
+                                <div class="progress-info">
+                                    <span><?php echo $progress_percentage; ?>%</span>
+                                    <span>Complete</span>
+                                </div>
+                            </div>
                             <?php endif; ?>
                         </div>
                     </div>
                     
-                    <div class="dashboard-card pickup-status">
-                        <h2>Pickup Status</h2>
-                        <p><?php echo $pickup_status; ?></p>
-                        <?php if($upcoming_pickup): ?>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?php echo $progress_percentage; ?>%"></div>
-                            </div>
-                            <span class="progress-text">Truck is <?php echo $progress_percentage; ?>% along the route.</span>
+                    <!-- Recent Notifications Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-bell"></i> Recent Notifications</h2>
+                            <a href="res_notif.php" class="header-link">View All</a>
                         </div>
-                        <?php endif; ?>
+                        <div class="card-body">
+                            <div class="notification-list" id="notificationList">
+                                <?php if(!empty($notifications)): ?>
+                                    <?php $count = 0; ?>
+                                    <?php foreach($notifications as $notification): ?>
+                                        <?php if($count >= 5) break; ?>
+                                        <div class="notification-item <?php echo (isset($notification['is_read']) && $notification['is_read'] == 0) ? 'unread' : ''; ?>" 
+                                             data-id="<?php echo $notification['id'] ?? ''; ?>">
+                                            <div class="notif-icon">
+                                                <?php
+                                                $icon = 'fa-bullhorn';
+                                                $iconColor = 'blue';
+                                                if(isset($notification['type'])) {
+                                                    switch($notification['type']) {
+                                                        case 'pickup_scheduled': $icon = 'fa-calendar-check'; $iconColor = 'green'; break;
+                                                        case 'pickup_completed': $icon = 'fa-check-circle'; $iconColor = 'green'; break;
+                                                        case 'pickup_delayed': $icon = 'fa-exclamation-triangle'; $iconColor = 'orange'; break;
+                                                        case 'pickup_cancelled': $icon = 'fa-times-circle'; $iconColor = 'red'; break;
+                                                        case 'emergency': $icon = 'fa-exclamation-circle'; $iconColor = 'red'; break;
+                                                        default: $icon = 'fa-bullhorn'; $iconColor = 'blue';
+                                                    }
+                                                }
+                                                ?>
+                                                <i class="fas <?php echo $icon; ?> <?php echo $iconColor; ?>"></i>
+                                            </div>
+                                            <div class="notif-content">
+                                                <h4><?php echo htmlspecialchars($notification['title']); ?></h4>
+                                                <p><?php echo htmlspecialchars(substr($notification['message'], 0, 80)); ?><?php echo strlen($notification['message']) > 80 ? '...' : ''; ?></p>
+                                                <small><i class="far fa-clock"></i> <?php echo date('M j, g:i A', strtotime($notification['created_at'])); ?></small>
+                                            </div>
+                                        </div>
+                                        <?php $count++; ?>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="empty-state-small">
+                                        <i class="fas fa-inbox"></i>
+                                        <p>No notifications from the past week</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="dashboard-card notifications">
-                        <h2>Recent Notifications</h2>
-                        <div class="notification-list" id="notificationList">
-                            <?php if(!empty($notifications)): ?>
-                                <?php foreach($notifications as $notification): ?>
-                                <div class="notification-item <?php echo (isset($notification['is_read']) && $notification['is_read'] == 0) ? 'unread' : ''; ?>" 
-                                     data-id="<?php echo $notification['id'] ?? ''; ?>">
-                                    <div class="notification-icon">
-                                        <?php
-                                        $icon = '📢';
-                                        if(isset($notification['type'])) {
-                                            switch($notification['type']) {
-                                                case 'pickup_scheduled': $icon = '📅'; break;
-                                                case 'pickup_completed': $icon = '✅'; break;
-                                                case 'pickup_delayed': $icon = '⚠️'; break;
-                                                case 'pickup_cancelled': $icon = '❌'; break;
-                                                case 'emergency': $icon = '🚨'; break;
-                                                default: $icon = '📢';
-                                            }
-                                        }
-                                        echo $icon;
-                                        ?>
-                                    </div>
-                                    <div class="notification-content">
-                                        <h4><?php echo htmlspecialchars($notification['title']); ?></h4>
-                                        <p><?php echo htmlspecialchars($notification['message']); ?></p>
-                                        <small><?php echo date('F j, Y, g:i A', strtotime($notification['created_at'])); ?></small>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="no-notifications">
-                                    <p>No notifications from the past week.</p>
-                                </div>
-                            <?php endif; ?>
+                    <!-- Quick Actions Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
                         </div>
-                        <a href="res_notif.php" class="view-all">View All Notifications</a>
-                    </div>
-                    
-                    <div class="dashboard-card actions">
-                        <h2>Actions</h2>
-                        <div class="action-buttons">
-                                <button id="report-missed-btn" class="btn btn-action">Report Missed Pickup</button>
-                                <button id="track-complaint-btn" class="btn btn-action">Track Complaint Status</button>
-                                 <button id="feedback-btn" class="btn btn-action">Feedback</button>
-                                <a href="barangay_register.php" class="btn btn-action">Application Status</a>
+                        <div class="card-body">
+                            <div class="action-grid">
+                                <button id="report-missed-btn" class="action-btn">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Report Missed Pickup</span>
+                                </button>
+                                <button id="track-complaint-btn" class="action-btn">
+                                    <i class="fas fa-search"></i>
+                                    <span>Track Complaint</span>
+                                </button>
+                                <button id="feedback-btn" class="action-btn">
+                                    <i class="fas fa-comment-dots"></i>
+                                    <span>Give Feedback</span>
+                                </button>
+                                <a href="barangay_register.php" class="action-btn">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Application Status</span>
+                                </a>
                             </div>
+                        </div>
                     </div>
                 </div>
             </div>

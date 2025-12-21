@@ -63,6 +63,7 @@ if ($stmt = $pdo->prepare($sql)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pickup Schedule - TrashTrace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/res_schedule.css">
 </head>
@@ -73,49 +74,52 @@ if ($stmt = $pdo->prepare($sql)) {
     <div class="dashboard-container">
         <?php include 'includes/header.php'; ?>
 
-        <main class="schedule-main main-offset">
+        <main class="schedule-main">
             <div class="container">
                 <div class="schedule-header">
-                    <h1>Trash Pickup Schedule</h1>
+                    <div class="header-content-wrap">
+                        <h1><i class="fas fa-calendar-alt"></i> Trash Pickup Schedule</h1>
+                        <p class="schedule-subtitle">View your waste collection calendar for <?php echo htmlspecialchars($user_barangay); ?></p>
+                    </div>
                     <div class="month-navigation">
-                        <button id="prev-month" class="nav-btn">&lt; Previous</button>
+                        <button id="prev-month" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
                         <h2 id="current-month"><?php echo date('F Y'); ?></h2>
-                        <button id="next-month" class="nav-btn">Next &gt;</button>
+                        <button id="next-month" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
 
                 <?php if ($user_type === 'admin'): ?>
                 <div class="worker-controls" id="worker-controls">
-                    <h3>Worker Controls</h3>
-                    <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="controls-header">
+                        <h3><i class="fas fa-user-cog"></i> Worker Controls</h3>
+                        <span class="worker-badge"><i class="fas fa-hard-hat"></i> Barangay Worker Mode</span>
+                    </div>
+                    <div class="controls-actions">
                         <button id="add-schedule-btn" class="btn btn-add">
                             <i class="fas fa-plus"></i> Add Schedule
                         </button>
                         <button id="bulk-add-btn" class="btn btn-add">
                             <i class="fas fa-calendar-plus"></i> Bulk Add
                         </button>
-                        <span style="font-size: 0.9rem; color: #666;">
-                            <i class="fas fa-user-hard-hat"></i> Barangay Worker Mode
-                        </span>
                     </div>
                 </div>
                 <?php endif; ?>
 
-                <div class="schedule-legend" aria-hidden="false">
+                <div class="schedule-legend">
                     <div class="legend-item">
-                        <div class="color-box scheduled" aria-hidden="true"></div>
+                        <div class="color-box scheduled"></div>
                         <span>Scheduled</span>
                     </div>
                     <div class="legend-item">
-                        <div class="color-box completed" aria-hidden="true"></div>
+                        <div class="color-box completed"></div>
                         <span>Completed</span>
                     </div>
                     <div class="legend-item">
-                        <div class="color-box delayed" aria-hidden="true"></div>
+                        <div class="color-box delayed"></div>
                         <span>Delayed</span>
                     </div>
                     <div class="legend-item">
-                        <div class="color-box cancelled" aria-hidden="true"></div>
+                        <div class="color-box cancelled"></div>
                         <span>Cancelled</span>
                     </div>
                 </div>

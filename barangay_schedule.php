@@ -45,105 +45,114 @@ if($stmt = $pdo->prepare($sql)){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barangay Schedule - TrashTrace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/barangay_schedule.css">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="logo">TrashTrace</div>
-                <nav>
-                    <ul>
-                        <li><a href="barangay_dashboard.php" class="nav-link">Dashboard</a></li>
-                        <li><a href="barangay_schedule.php" class="nav-link active">Schedule</a></li>
-                        <li>
-                            <a href="barangay_applications.php" class="nav-link">Applications</a>
-                        </li>
-                        <li><a href="barangay_notifications.php" class="nav-link">Notifications</a></li>
-                        <li><a href="barangay_reports.php" class="nav-link">Reports</a></li>
-                        <li class="user-menu">
-                            <span>Welcome, <?php echo htmlspecialchars($user_name); ?></span>
-                            <a href="logout.php" class="btn btn-outline">Logout</a>
-                        </li>
-                    </ul>
-                </nav>
+    <?php include 'includes/header.php'; ?>
+
+    <main class="schedule-main">
+        <div class="container">
+            <div class="schedule-header-section">
+                <h1><i class="far fa-calendar-alt"></i> Pickup Schedule Management</h1>
             </div>
-        </header>
-
-        <main class="schedule-main">
-            <div class="container">
-                <div class="schedule-header">
-                    <h1>Barangay Pickup Schedule</h1>
+            
+            <!-- Stats Row -->
+            <div class="schedule-stats">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e8f5e9; color: #4caf50;">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo htmlspecialchars($user_barangay); ?></h3>
+                        <p>Barangay</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e3f2fd; color: #1976d2;">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo htmlspecialchars($user_city); ?></h3>
+                        <p>City</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff3e0; color: #ff9800;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3><?php echo count($schedules); ?></h3>
+                        <p>This Month</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calendar Card -->
+            <div class="calendar-card">
+                <div class="card-header">
                     <div class="month-navigation">
-                        <button id="prev-month" class="nav-btn">&lt; Previous</button>
+                        <button id="prev-month" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
                         <h2 id="current-month"><?php echo date('F Y'); ?></h2>
-                        <button id="next-month" class="nav-btn">Next &gt;</button>
+                        <button id="next-month" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
                     </div>
-                </div>
-
-                <div class="barangay-info">
-                    <div class="info-card">
-                        <h3><i class="fas fa-info-circle"></i> Barangay Information</h3>
-                        <div class="info-content">
-                            <p><strong>Barangay:</strong> <?php echo htmlspecialchars($user_barangay); ?></p>
-                            <p><strong>City:</strong> <?php echo htmlspecialchars($user_city); ?></p>
-                            <p><strong>Schedules this month:</strong> <?php echo count($schedules); ?></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="worker-controls">
-                    <h3><i class="fas fa-user-hard-hat"></i> Worker Controls</h3>
-                    <div class="controls-buttons">
-                        <button id="add-schedule-btn" class="btn btn-action">
+                    <div class="header-actions">
+                        <button id="add-schedule-btn" class="btn-primary">
                             <i class="fas fa-plus"></i> Add Schedule
                         </button>
-                        <button id="bulk-add-btn" class="btn btn-action">
+                        <button id="bulk-add-btn" class="btn-outline">
                             <i class="fas fa-calendar-plus"></i> Bulk Add
                         </button>
                     </div>
                 </div>
-
-                <div class="calendar-container">
-                    <div class="calendar-header">
-                        <div class="day-header">Sun</div>
-                        <div class="day-header">Mon</div>
-                        <div class="day-header">Tue</div>
-                        <div class="day-header">Wed</div>
-                        <div class="day-header">Thu</div>
-                        <div class="day-header">Fri</div>
-                        <div class="day-header">Sat</div>
-                    </div>
-                    <div class="calendar-body" id="calendar-body">
+                
+                <div class="card-body">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <div class="day-header">Sun</div>
+                            <div class="day-header">Mon</div>
+                            <div class="day-header">Tue</div>
+                            <div class="day-header">Wed</div>
+                            <div class="day-header">Thu</div>
+                            <div class="day-header">Fri</div>
+                            <div class="day-header">Sat</div>
+                        </div>
+                        <div class="calendar-body" id="calendar-body">
+                        </div>
                     </div>
                 </div>
-
-                <div class="schedule-legend">
-                    <div class="legend-item">
-                        <div class="color-box scheduled"></div>
-                        <span>Scheduled</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box completed"></div>
-                        <span>Completed</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box delayed"></div>
-                        <span>Delayed</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box cancelled"></div>
-                        <span>Cancelled</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="color-box" style="background-color: #9c27b0;"></div>
-                        <span>Multiple Schedules</span>
+                
+                <div class="card-footer">
+                    <div class="schedule-legend">
+                        <div class="legend-item">
+                            <div class="color-box scheduled"></div>
+                            <span>Scheduled</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box completed"></div>
+                            <span>Completed</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box delayed"></div>
+                            <span>Delayed</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box cancelled"></div>
+                            <span>Cancelled</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-box multiple"></div>
+                            <span>Multiple</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
+            </div>
+        </div>
+    </main>
 
     <div id="schedule-modal" class="modal">
         <div class="modal-content">

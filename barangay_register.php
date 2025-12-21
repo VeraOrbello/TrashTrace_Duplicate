@@ -227,224 +227,180 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_worker"]) && e
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register as Barangay Worker - TrashTrace</title>
-    <link rel="stylesheet" href="css/barangay_register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/barangay_register.css">
     <style>
-        /* Character counter styles */
         .char-counter {
-            font-size: 12px;
-            color: #7f8c8d;
+            font-size: 0.7rem;
+            color: #999;
             text-align: right;
-            margin-top: 5px;
-            font-weight: 400;
+            margin-top: 0.25rem;
         }
 
         .char-counter.warning {
-            color: #f39c12;
+            color: #ff9800;
         }
 
         .char-counter.error {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-
-        /* Textarea container styling */
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
-        }
-
-        /* Label styling */
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        /* Optional field indicator */
-        .form-group label:has(+ textarea[placeholder*="Optional"])::after {
-            content: " (Optional)";
-            font-weight: normal;
-            color: #7f8c8d;
+            color: #f44336;
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <header class="register-header">
-            <div class="header-content">
-                <div class="logo">
-                    <a href="dashboard.php"><i class="fas fa-recycle"></i> TrashTrace</a>
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="dashboard.php" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
-                        <li><a href="res_schedule.php" class="nav-link"><i class="fas fa-calendar"></i> Schedule</a></li>
-                        <li><a href="res_notif.php" class="nav-link"><i class="fas fa-bell"></i> Notifications</a></li>
-                        <li><a href="res_profile.php" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
-                        <li class="user-menu">
-                            <span><i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($_SESSION["full_name"]); ?></span>
-                            <a href="logout.php" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                        </li>
-                    </ul>
-                </nav>
+    <?php include 'includes/header.php'; ?>
+    
+    <main class="register-main">
+        <div class="container">
+            <div class="register-header-section">
+                <h1><i class="fas fa-user-check"></i> Barangay Worker Validation</h1>
+                <p class="register-subtitle">Register as an existing barangay worker to access work features</p>
             </div>
-        </header>
-
-        <main class="register-main">
-            <div class="container">
-                <div class="registration-wrapper">
-                    <div class="registration-header">
-                        <h1><i class="fas fa-hands-helping"></i> Barangay Worker Validation</h1>
-                        <p class="subtitle">Register as an existing barangay worker to access work features</p>
+            
+            <?php if($success_message): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <div class="alert-content">
+                    <strong><?php echo $success_message; ?></strong>
+                    <p><i class="fas fa-envelope"></i> We will contact you via email or phone once your validation is confirmed.</p>
+                    <p><i class="fas fa-clock"></i> Your application status is now: <strong>Pending Review</strong></p>
+                    <div class="alert-actions">
+                        <a href="dashboard.php" class="btn-sm btn-primary">
+                            <i class="fas fa-th-large"></i> Dashboard
+                        </a>
+                        <a href="res_profile.php" class="btn-sm btn-outline">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
                     </div>
-                    
-                    <?php if($success_message): ?>
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i> <?php echo $success_message; ?>
-                        <div class="notification-info">
-                            <p><i class="fas fa-envelope"></i> We will contact you via email or phone once your validation is confirmed.</p>
-                            <p><i class="fas fa-clock"></i> Your application status is now: <strong>Pending Review</strong></p>
-                        </div>
-                        <div class="success-actions">
-                            <a href="dashboard.php" class="btn btn-continue">
-                                <i class="fas fa-home"></i> Continue to Dashboard
-                            </a>
-                            <a href="res_profile.php" class="btn btn-profile">
-                                <i class="fas fa-user"></i> View My Profile
-                            </a>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    
-                    <?php if($error_message): ?>
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error_message); ?>
-                        <?php if(strpos($error_message, 'already have') !== false): ?>
-                        <div class="existing-app-info">
-                            <a href="res_profile.php" class="btn btn-profile">
-                                <i class="fas fa-eye"></i> View Application Status
-                            </a>
-                        </div>
-                        <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php if($error_message): ?>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="alert-content">
+                    <strong><?php echo htmlspecialchars($error_message); ?></strong>
+                    <?php if(strpos($error_message, 'already have') !== false): ?>
+                    <div class="alert-actions">
+                        <a href="res_profile.php" class="btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> View Status
+                        </a>
                     </div>
                     <?php endif; ?>
-                    
-                    <?php 
-                    // Check if user can submit application
-                    $can_submit = true;
-                    $check_sql = "SELECT * FROM worker_applications WHERE user_id = :user_id AND status IN ('pending', 'reviewing')";
-                    if($check_stmt = $pdo->prepare($check_sql)){
-                        $check_stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
-                        if($check_stmt->execute()){
-                            if($check_stmt->rowCount() > 0){
-                                $can_submit = false;
-                                $app_data = $check_stmt->fetch(PDO::FETCH_ASSOC);
-                                ?>
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i> You already have a worker validation request. 
-                                    <p>Status: <strong><?php echo ucfirst($app_data['status']); ?></strong></p>
-                                    <p>Submitted: <?php echo date('M d, Y', strtotime($app_data['submitted_at'])); ?></p>
-                                    <div class="existing-app-info">
-                                        <a href="res_profile.php" class="btn btn-profile">
-                                            <i class="fas fa-eye"></i> View Application Status
-                                        </a>
-                                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php 
+            // Check if user can submit application
+            $can_submit = true;
+            $check_sql = "SELECT * FROM worker_applications WHERE user_id = :user_id AND status IN ('pending', 'reviewing')";
+            if($check_stmt = $pdo->prepare($check_sql)){
+                $check_stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
+                if($check_stmt->execute()){
+                    if($check_stmt->rowCount() > 0){
+                        $can_submit = false;
+                        $app_data = $check_stmt->fetch(PDO::FETCH_ASSOC);
+                        ?>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="alert-content">
+                                <strong>You already have a worker validation request.</strong>
+                                <p>Status: <strong><?php echo ucfirst($app_data['status']); ?></strong></p>
+                                <p>Submitted: <?php echo date('M d, Y', strtotime($app_data['submitted_at'])); ?></p>
+                                <div class="alert-actions">
+                                    <a href="res_profile.php" class="btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View Status
+                                    </a>
                                 </div>
-                                <?php
-                            }
-                        }
-                        unset($check_stmt);
+                            </div>
+                        </div>
+                        <?php
                     }
-                    
-                    if(isset($user_data['user_type']) && $user_data['user_type'] === 'admin'): ?>
-                    <div class="alert alert-warning">
-                        <i class="fas fa-check-circle"></i> You are already a validated worker.
-                        <p>You have access to all worker features.</p>
-                        <div class="success-actions">
-                            <a href="barangay_dashboard.php" class="btn btn-continue">
-                                <i class="fas fa-tachometer-alt"></i> Go to Worker Dashboard
-                            </a>
+                }
+                unset($check_stmt);
+            }
+            
+            if(isset($user_data['user_type']) && $user_data['user_type'] === 'admin'): ?>
+            <div class="alert alert-warning">
+                <i class="fas fa-check-circle"></i>
+                <div class="alert-content">
+                    <strong>You are already a validated worker.</strong>
+                    <p>You have access to all worker features.</p>
+                    <div class="alert-actions">
+                        <a href="barangay_dashboard.php" class="btn-sm btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Worker Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <?php elseif($can_submit && empty($success_message)): 
+                showRegistrationForm($user_data, $cebuBarangays);
+            endif;
+            
+            function showRegistrationForm($user_data, $cebuBarangays) {
+            ?>
+            <div class="registration-layout">
+                <div class="benefits-sidebar">
+                    <div class="benefit-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-star"></i> Worker Benefits</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="benefit-item">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <div>
+                                    <h3>Worker Dashboard</h3>
+                                    <p>Manage schedules and activities</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <div>
+                                    <h3>Schedule Management</h3>
+                                    <p>Coordinate waste collection</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <div>
+                                    <h3>Earn Compensation</h3>
+                                    <p>Get paid for your service</p>
+                                </div>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-leaf"></i>
+                                <div>
+                                    <h3>Clean Community</h3>
+                                    <p>Make your barangay greener</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <?php elseif($can_submit && empty($success_message)): 
-                        showRegistrationForm($user_data, $cebuBarangays);
-                    endif;
                     
-                    function showRegistrationForm($user_data, $cebuBarangays) {
-                    ?>
-                    <div class="registration-content">
-                        <div class="benefits-section">
-                            <div class="benefits-card">
-                                <h2><i class="fas fa-star"></i> Worker Benefits</h2>
-                                <div class="benefit-item">
-                                    <div class="benefit-icon">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </div>
-                                    <div class="benefit-content">
-                                        <h3>Access to Worker Dashboard</h3>
-                                        <p>Manage schedules and track your work activities</p>
-                                    </div>
-                                </div>
-                                <div class="benefit-item">
-                                    <div class="benefit-icon">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </div>
-                                    <div class="benefit-content">
-                                        <h3>Manage Pickup Schedules</h3>
-                                        <p>Coordinate waste collection efficiently</p>
-                                    </div>
-                                </div>
-                                <div class="benefit-item">
-                                    <div class="benefit-icon">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                    </div>
-                                    <div class="benefit-content">
-                                        <h3>Earn While Serving</h3>
-                                        <p>Get compensated for your community service</p>
-                                    </div>
-                                </div>
-                                <div class="benefit-item">
-                                    <div class="benefit-icon">
-                                        <i class="fas fa-leaf"></i>
-                                    </div>
-                                    <div class="benefit-content">
-                                        <h3>Improve Waste Management</h3>
-                                        <p>Make your barangay cleaner and greener</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="requirements-card">
-                                <h2><i class="fas fa-clipboard-check"></i> Verification Requirements</h2>
-                                <ul class="requirements-list">
-                                    <li><i class="fas fa-check"></i> Valid Worker ID</li>
-                                    <li><i class="fas fa-check"></i> Barangay Employment Proof</li>
-                                    <li><i class="fas fa-check"></i> Medical Certificate</li>
-                                    <li><i class="fas fa-check"></i> Barangay Clearance</li>
-                                    <li><i class="fas fa-check"></i> Current Work Schedule</li>
-                                </ul>
-                            </div>
+                    <div class="benefit-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-clipboard-check"></i> Requirements</h2>
                         </div>
-                        
-                        <div class="registration-form-section">
-                            <div class="form-card">
-                                <div class="form-header">
-                                    <h2><i class="fas fa-user-check"></i> Worker Validation Form</h2>
-                                    <p>Register as an existing barangay worker to access work features</p>
-                                </div>
+                        <div class="card-body">
+                            <ul class="requirements-list">
+                                <li><i class="fas fa-check"></i> Valid Worker ID</li>
+                                <li><i class="fas fa-check"></i> Employment Proof</li>
+                                <li><i class="fas fa-check"></i> Medical Certificate</li>
+                                <li><i class="fas fa-check"></i> Barangay Clearance</li>
+                                <li><i class="fas fa-check"></i> Work Schedule</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="registration-form-section">
+                    <div class="form-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-user-check"></i> Worker Validation Form</h2>
+                            <p>Complete the form below to register as a barangay worker</p>
+                        </div>
                                 
                                 <form method="POST" enctype="multipart/form-data" class="worker-form" autocomplete="off">
                                     <input type="hidden" name="register_worker" value="1">
@@ -599,13 +555,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_worker"]) && e
                                         </div>
                                     </div>
                                     
-                                    <div class="form-footer">
-                                        <button type="submit" class="btn btn-submit">
-                                            <i class="fas fa-paper-plane"></i> Submit Validation
-                                        </button>
-                                        <a href="dashboard.php" class="btn btn-cancel">
+                                    <div class="submit-section">
+                                        <a href="dashboard.php" class="btn-cancel">
                                             <i class="fas fa-times"></i> Cancel
                                         </a>
+                                        <button type="submit" class="btn-submit">
+                                            <i class="fas fa-paper-plane"></i> Submit Validation
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -614,8 +570,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_worker"]) && e
                     <?php } ?>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
     
 <script>
 // Character counter functionality
