@@ -280,151 +280,7 @@ function generateMonthSchedules($month, $barangay = "") {
     <link rel="stylesheet" href="../css/driver/master-styles.css">
     
     <style>
-        /* Navbar enhancements - Improved visibility and glow */
-        .dashboard-header {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(30px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
 
-        .logo {
-            color: #2c3e50;
-            font-weight: 600;
-            font-size: 1.4rem;
-            transition: all 0.3s ease;
-        }
-
-        .logo:hover {
-            color: #2e7d32;
-            text-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
-        }
-
-        .logo i {
-            color: #4caf50;
-            transition: all 0.3s ease;
-        }
-
-        .logo:hover i {
-            text-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .nav-link {
-            background: rgba(248, 253, 249, 0.9);
-            border-radius: 12px;
-            border: 1px solid rgba(232, 245, 233, 0.7);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            color: #2c3e50;
-        }
-
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
-            border-color: rgba(76, 175, 80, 0.4);
-            color: #2c3e50;
-        }
-
-        .nav-link:hover::before {
-            opacity: 1;
-        }
-
-        .nav-link:hover i,
-        .nav-link:hover span {
-            color: #2c3e50;
-            text-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
-            filter: drop-shadow(0 0 8px rgba(46, 125, 50, 0.4));
-        }
-
-        .nav-link.active {
-            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95), rgba(241, 248, 233, 0.9));
-            border-color: rgba(76, 175, 80, 0.4);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
-            color: #2c3e50;
-        }
-
-        .nav-link.active::before {
-            opacity: 1;
-        }
-
-        .nav-link.active i,
-        .nav-link.active span {
-            color: #2c3e50;
-            font-weight: 600;
-            text-shadow: 0 0 10px rgba(46, 125, 50, 0.4);
-        }
-
-        .nav-link i {
-            color: #4caf50;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link span {
-            color: #2c3e50;
-            transition: all 0.3s ease;
-        }
-
-        .user-info {
-            background: rgba(248, 253, 249, 0.9);
-            border-radius: 12px;
-            border: 1px solid rgba(232, 245, 233, 0.7);
-            padding: 8px 16px;
-            transition: all 0.3s ease;
-        }
-
-        .user-info:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
-            border-color: rgba(76, 175, 80, 0.3);
-        }
-
-        .user-avatar {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-        }
-
-        .user-name {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .user-id {
-            color: #666;
-            font-size: 0.85rem;
-        }
-
-        .btn-logout {
-            background: rgba(248, 253, 249, 0.9);
-            border: 1px solid rgba(232, 245, 233, 0.7);
-            border-radius: 12px;
-            color: #2c3e50;
-            transition: all 0.3s ease;
-        }
-
-        .btn-logout:hover {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
-        }
-
-        .btn-logout:hover i {
-            color: white;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
 
         .driver-barangay-info {
             background: linear-gradient(135deg, #e3f2fd, #bbdefb);
@@ -857,7 +713,118 @@ function generateMonthSchedules($month, $barangay = "") {
 </head>
 <body>
     <div class="dashboard-container">
-        <?php include '../includes/header.php'; ?>
+        <?php
+// Shared header/navbar
+$current_page = basename($_SERVER['PHP_SELF']);
+$user_type = $_SESSION['user_type'] ?? '';
+$current_dir = dirname($_SERVER['PHP_SELF']);
+$is_driver_page = strpos($current_dir, '/driver') !== false || $current_page === 'driver_dashboard.php';
+$base_path = '/TrashTrace_Duplicate/';
+?>
+<header class="dashboard-header">
+    <div class="grid-background-nav"></div>
+
+    <div class="header-content">
+        <?php if($user_type === 'driver'): ?>
+            <a href="<?php echo $base_path; ?>driver_dashboard.php" class="logo">
+                <i class="fas fa-recycle"></i>
+                <span>TrashTrace Driver</span>
+            </a>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav id="mainNav">
+                <div class="nav-container">
+                    <ul>
+        <?php else: ?>
+            <div class="logo">
+                <img src="assets/images/trashtrace logo green.png" alt="TrashTrace Logo" class="logo-img">
+                <?php if($user_type === 'admin'): ?>
+                <span class="portal-label">Admin Portal</span>
+                <?php endif; ?>
+            </div>
+            <nav class="main-nav">
+                <ul>
+        <?php endif; ?>
+                <?php if($user_type === 'admin'): ?>
+                    <li><a href="barangay_dashboard.php" class="nav-link <?php echo $current_page === 'barangay_dashboard.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a></li>
+                    <li><a href="barangay_schedule.php" class="nav-link <?php echo $current_page === 'barangay_schedule.php' ? 'active' : ''; ?>">
+                        <i class="far fa-calendar"></i>
+                        <span>Schedule</span>
+                    </a></li>
+                    <li><a href="barangay_applications.php" class="nav-link <?php echo $current_page === 'barangay_applications.php' ? 'active' : ''; ?>">
+                        <i class="far fa-file-alt"></i>
+                        <span>Applications</span>
+                    </a></li>
+                    <li><a href="barangay_notifications.php" class="nav-link <?php echo $current_page === 'barangay_notifications.php' ? 'active' : ''; ?>">
+                        <i class="far fa-bell"></i>
+                        <span>Notifications</span>
+                    </a></li>
+                    <li><a href="barangay_reports.php" class="nav-link <?php echo $current_page === 'barangay_reports.php' ? 'active' : ''; ?>">
+                        <i class="far fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a></li>
+                <?php elseif($user_type === 'driver'): ?>
+                    <li><a href="<?php echo $base_path; ?>driver_dashboard.php" class="nav-link <?php echo $current_page === 'driver_dashboard.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/assignments.php" class="nav-link <?php echo $current_page === 'assignments.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/routes.php" class="nav-link <?php echo $current_page === 'routes.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-route"></i>
+                        <span>Routes</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/history.php" class="nav-link <?php echo $current_page === 'history.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/collections.php" class="nav-link <?php echo $current_page === 'collections.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-trash"></i>
+                        <span>Collections</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/earnings.php" class="nav-link <?php echo $current_page === 'earnings.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Earnings</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/profile.php" class="nav-link <?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a></li>
+                <?php else: ?>
+                    <li><a href="dashboard.php" class="nav-link <?php echo $current_page === 'dashboard.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a></li>
+                    <li><a href="res_schedule.php" class="nav-link <?php echo $current_page === 'res_schedule.php' ? 'active' : ''; ?>">
+                        <i class="far fa-calendar"></i>
+                        <span>Schedule</span>
+                    </a></li>
+                    <li><a href="res_notif.php" class="nav-link <?php echo $current_page === 'res_notif.php' ? 'active' : ''; ?>">
+                        <i class="far fa-bell"></i>
+                        <span>Notifications</span>
+                    </a></li>
+                    <li><a href="res_profile.php" class="nav-link <?php echo $current_page === 'res_profile.php' ? 'active' : ''; ?>">
+                        <i class="far fa-user"></i>
+                        <span>Profile</span>
+                    </a></li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <a href="logout.php" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+</header>
         
         <main class="dashboard-main">
             <div class="container">

@@ -17,7 +17,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $user_type = $_SESSION['user_type'] ?? '';
 
 // Get resident ID from session
-$resident_id = $_SESSION['id'] ?? 0;
+$resident_id = $_SESSION['user_id'] ?? $_SESSION['id'] ?? 0;
 $user_barangay = $_SESSION['barangay'] ?? '';
 
 // Handle actions
@@ -28,19 +28,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $link->prepare($update_query);
         $stmt->bind_param("iis", $notification_id, $resident_id, $user_barangay);
         $stmt->execute();
+        $affected = $stmt->affected_rows;
 
-        echo json_encode(['success' => true]);
+        echo json_encode(['success' => $affected > 0]);
         exit();
     }
 
     if (isset($_POST['delete_notification'])) {
-        $notification_id = $_POST['notification_id'];
-        $delete_query = "DELETE FROM notifications WHERE id = ? AND (user_id = ? OR (user_id IS NULL AND barangay = ?))";
-        $stmt = $link->prepare($delete_query);
-        $stmt->bind_param("iis", $notification_id, $resident_id, $user_barangay);
-        $stmt->execute();
+        error_log("Delete POST received for notification_id: " . $_POST['notification_id']);
+        try {
+            $notification_id = $_POST['notification_id'];
 
-        echo json_encode(['success' => true]);
+            // Debug: Check the notification details
+            $check_query = "SELECT user_id, barangay FROM notifications WHERE id = ?";
+            $check_stmt = $link->prepare($check_query);
+            if (!$check_stmt) {
+                throw new Exception("Prepare check query failed: " . $link->error);
+            }
+            $check_stmt->bind_param("i", $notification_id);
+            if (!$check_stmt->execute()) {
+                throw new Exception("Execute check query failed: " . $check_stmt->error);
+            }
+            $check_result = $check_stmt->get_result();
+            if ($check_result->num_rows > 0) {
+                $notif = $check_result->fetch_assoc();
+                error_log("Notification $notification_id: user_id=" . ($notif['user_id'] ?? 'NULL') . ", barangay=" . ($notif['barangay'] ?? 'NULL'));
+            } else {
+                error_log("Notification $notification_id not found");
+            }
+
+            $delete_query = "DELETE FROM notifications WHERE id = ? AND (user_id = ? OR (user_id IS NULL AND barangay = ?))";
+            $stmt = $link->prepare($delete_query);
+            if (!$stmt) {
+                throw new Exception("Prepare delete query failed: " . $link->error);
+            }
+            $stmt->bind_param("iis", $notification_id, $resident_id, $user_barangay);
+            if (!$stmt->execute()) {
+                throw new Exception("Execute delete query failed: " . $stmt->error);
+            }
+            $affected = $stmt->affected_rows;
+
+            // Debug output
+            error_log("Delete attempt: notification_id=$notification_id, resident_id=$resident_id, user_barangay=$user_barangay, affected=$affected");
+
+            echo json_encode(['success' => $affected > 0, 'debug' => ['notification_id' => $notification_id, 'resident_id' => $resident_id, 'user_barangay' => $user_barangay, 'affected' => $affected]]);
+        } catch (Exception $e) {
+            error_log("Delete error: " . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
         exit();
     }
 
@@ -401,10 +436,10 @@ $stats['today'] = $stats['today'] ?? 0;
                     e.preventDefault();
                     return false;
                 }
-                
+
                 var form = $(this);
                 var notificationCard = form.closest('.notification-card');
-                
+
                 e.preventDefault();
                 $.ajax({
                     type: 'POST',
@@ -412,6 +447,7 @@ $stats['today'] = $stats['today'] ?? 0;
                     data: form.serialize(),
                     dataType: 'json',
                     success: function(response) {
+                        alert('Delete response: ' + JSON.stringify(response));
                         if (response.success) {
                             notificationCard.fadeOut(300, function() {
                                 $(this).remove();
@@ -419,7 +455,12 @@ $stats['today'] = $stats['today'] ?? 0;
                                     location.reload();
                                 }
                             });
+                        } else {
+                            alert('Delete failed: ' + (response.error || 'Unknown error'));
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('AJAX Error: ' + status + ' - ' + error + '\nResponse: ' + xhr.responseText);
                     }
                 });
             });
