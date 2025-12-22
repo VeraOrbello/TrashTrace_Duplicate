@@ -17,7 +17,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $user_type = $_SESSION['user_type'] ?? '';
 
 // Get resident ID from session
-$resident_id = $_SESSION['user_id'] ?? 0;
+$resident_id = $_SESSION['id'] ?? 0;
 $user_barangay = $_SESSION['barangay'] ?? '';
 
 // Handle actions

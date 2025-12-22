@@ -85,10 +85,12 @@ $pickup_status = $todays_stats['total'] > 0 ? "Pickup in Progress" : "No schedul
 
 $one_week_ago = date('Y-m-d H:i:s', strtotime('-1 week'));
 $notifications = [];
-$notification_sql = "SELECT * FROM notifications 
+$notification_sql = "SELECT * FROM notifications
                     WHERE (barangay = :barangay OR barangay IS NULL)
+                    AND user_id IS NULL
+                    AND type != 'pickup_scheduled'
                     AND created_at >= :one_week_ago
-                    ORDER BY created_at DESC 
+                    ORDER BY created_at DESC
                     LIMIT 5";
                     
 if($stmt = $pdo->prepare($notification_sql)){
