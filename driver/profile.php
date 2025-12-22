@@ -333,7 +333,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
                             <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
                             <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
-                            <li><a href="history.php" class="nav-link"><i class="fas fa-history"></i> <span>History</span></a></li>
+                         
                             <li><a href="profile.php" class="nav-link active"><i class="fas fa-user"></i> <span>Profile</span></a></li>
                         </ul>
                     </div>
