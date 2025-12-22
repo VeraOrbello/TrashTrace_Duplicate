@@ -11,7 +11,7 @@ $base_path = '/TrashTrace_Duplicate/';
     
     <div class="header-content">
         <?php if($user_type === 'driver'): ?>
-            <a href="<?php echo $base_path; ?>driver_dashboard.php" class="logo">
+            <a href="../driver_dashboard.php" class="logo">
                 <i class="fas fa-recycle"></i>
                 <span>TrashTrace Driver</span>
             </a>
@@ -32,7 +32,7 @@ $base_path = '/TrashTrace_Duplicate/';
                 <ul>
         <?php endif; ?>
                 <?php if($user_type === 'admin'): ?>
-                    <li><a href="barangay_dashboard.php" class="nav-link <?php echo $current_page === 'barangay_dashboard.php' ? 'active' : ''; ?>">
+                    <li><a href="TrashTrace_Duplicate/driver_dashboard.php" class="nav-link <?php echo $current_page === 'barangay_dashboard.php' ? 'active' : ''; ?>">
                         <i class="fas fa-th-large"></i>
                         <span>Dashboard</span>
                     </a></li>
@@ -53,28 +53,27 @@ $base_path = '/TrashTrace_Duplicate/';
                         <span>Reports</span>
                     </a></li>
                 <?php elseif($user_type === 'driver'): ?>
-                    <li><a href="<?php echo $base_path; ?>driver_dashboard.php" class="nav-link <?php echo $current_page === 'driver_dashboard.php' ? 'active' : ''; ?>">
+                    <li><a href="/TrashTrace_Duplicate/driver_dashboard.php" class="nav-link <?php echo $current_page === 'driver_dashboard.php' ? 'active' : ''; ?>">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
-   
                     </a></li>
-                    <li><a href="<?php echo $base_path; ?>driver/assignments.php" class="nav-link <?php echo $current_page === 'assignments.php' ? 'active' : ''; ?>">
+                    <li><a href="/TrashTrace_Duplicate/driver/assignments.php" class="nav-link <?php echo $current_page === 'assignments.php' ? 'active' : ''; ?>">
                         <i class="fas fa-tasks"></i>
                         <span>Assignments</span>
                     </a></li>
-                    <li><a href="<?php echo $base_path; ?>driver/routes.php" class="nav-link <?php echo $current_page === 'routes.php' ? 'active' : ''; ?>">
+                    <li><a href="/TrashTrace_Duplicate/driver/routes.php" class="nav-link <?php echo $current_page === 'routes.php' ? 'active' : ''; ?>">
                         <i class="fas fa-route"></i>
                         <span>Routes</span>
                     </a></li>
-                    <li><a href="<?php echo $base_path; ?>driver/collections.php" class="nav-link active">
+                    <li><a href="/TrashTrace_Duplicate/driver/collections.php" class="nav-link <?php echo $current_page === 'collections.php' ? 'active' : ''; ?>">
                         <i class="fas fa-trash"></i>
                         <span>Collections</span>
                     </a></li>
-                    <li><a href="<?php echo $base_path; ?>driver/earnings.php" class="nav-link <?php echo $current_page === 'earnings.php' ? 'active' : ''; ?>">
+                    <li><a href="/TrashTrace_Duplicate/driver/earnings.php" class="nav-link <?php echo $current_page === 'earnings.php' ? 'active' : ''; ?>">
                         <i class="fas fa-money-bill-wave"></i>
                         <span>Earnings</span>
                     </a></li>
-                    <li><a href="<?php echo $base_path; ?>driver/profile.php" class="nav-link <?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
+                    <li><a href="/TrashTrace_Duplicate/driver/profile.php" class="nav-link <?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
                         <i class="fas fa-user"></i>
                         <span>Profile</span>
                     </a></li>

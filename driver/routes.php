@@ -68,6 +68,8 @@ if(isset($_POST['complete_route']) && isset($_POST['route_id'])) {
     $route_data = json_decode($_POST['route_data'], true);
     
     // Store completed route in session
+
+    
     $completed_route = [
         'id' => $route_id,
         'route_name' => $route_data['name'] ?? 'Unknown Route',
