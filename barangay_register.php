@@ -98,13 +98,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_worker"]) && e
             $id_proof_path = null;
             if(isset($_FILES['id_proof']) && $_FILES['id_proof']['error'] === UPLOAD_ERR_OK){
                 // Use a directory that we know is writable
-                $baseDir = '/Applications/XAMPP/xamppfiles/temp/trash_trace_uploads/';
+                $baseDir = '/Applications/XAMPP/xamppfiles/temp/s24105073_trash_trace_uploads/';
                 
                 // Create directory if it doesn't exist
                 if(!is_dir($baseDir)){
                     if(!mkdir($baseDir, 0777, true)){
                         // Try one more location
-                        $baseDir = sys_get_temp_dir() . '/trash_trace_uploads/';
+                        $baseDir = sys_get_temp_dir() . '/s24105073_trash_trace_uploads/';
                         if(!is_dir($baseDir)){
                             mkdir($baseDir, 0777, true);
                         }

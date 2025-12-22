@@ -7,7 +7,7 @@ define('BASE_PATH', '/TrashTrace_Duplicate/');
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');
-define('DB_NAME', 'trash_trace');
+define('DB_NAME', 's24105073_trash_trace');
 
 try {
     $pdo = new PDO("mysql:host=" . DB_SERVER . ";dbname=" . DB_NAME, DB_USERNAME, DB_PASSWORD);
