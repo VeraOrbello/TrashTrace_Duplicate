@@ -13,7 +13,7 @@ if($_SESSION["user_type"] !== 'admin'){
 
 $user_barangay = $_SESSION['barangay'] ?? '';
 $notifications = [];
-$sql = "SELECT * FROM notifications WHERE (barangay = :barangay OR barangay IS NULL) AND user_id IS NULL ORDER BY created_at DESC LIMIT 100";
+$sql = "SELECT * FROM notifications WHERE (barangay = :barangay OR barangay IS NULL) AND user_id IS NULL AND type != 'pickup_scheduled' ORDER BY created_at DESC LIMIT 100";
 if($stmt = $pdo->prepare($sql)){
     $stmt->bindParam(':barangay', $user_barangay, PDO::PARAM_STR);
     if($stmt->execute()){

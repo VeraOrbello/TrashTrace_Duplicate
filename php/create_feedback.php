@@ -43,11 +43,11 @@ if($stmt = $pdo->prepare($sql)){
     if($stmt->execute()){
         $feedback_id = $pdo->lastInsertId();
         
-        $notif_sql = "INSERT INTO notifications (user_id, barangay, type, title, message, is_read, created_at) VALUES (NULL, :barangay, 'general', :title, :message, 0, NOW())";
+        $notif_sql = "INSERT INTO notifications (user_id, barangay, type, title, message, is_read, created_at) VALUES (:user_id, NULL, 'general', :title, :message, 0, NOW())";
         if($nstmt = $pdo->prepare($notif_sql)){
             $title = 'New Feedback: ' . $category;
             $message = substr($description,0,200);
-            $nstmt->bindParam(':barangay', $user_barangay, PDO::PARAM_STR);
+            $nstmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $nstmt->bindParam(':title', $title, PDO::PARAM_STR);
             $nstmt->bindParam(':message', $message, PDO::PARAM_STR);
             $nstmt->execute();
