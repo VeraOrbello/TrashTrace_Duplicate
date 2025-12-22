@@ -14,7 +14,7 @@ if($_SESSION["user_type"] !== 'driver'){
 
 $driver_id = $_SESSION["id"];
 $driver_name = $_SESSION["full_name"];
-$driver_email = $_SESSION["email"];
+$driver_email = $_SESSION["email"] ?? 'Not set';
 $driver_phone = $_SESSION["phone"] ?? 'Not set';
 $driver_address = $_SESSION["address"] ?? 'Not set';
 

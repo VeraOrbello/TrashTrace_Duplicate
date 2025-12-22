@@ -4,7 +4,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 $user_type = $_SESSION['user_type'] ?? '';
 $current_dir = dirname($_SERVER['PHP_SELF']);
 $is_in_driver_subfolder = strpos($current_dir, '/driver') !== false;
-$base_path = '/TrashTrace_Duplicate/';
+$base_path = '/';
 ?>
 <header class="dashboard-header">
     <div class="grid-background-nav"></div>
@@ -26,27 +26,27 @@ $base_path = '/TrashTrace_Duplicate/';
             <nav id="mainNav">
                 <div class="nav-container">
                     <ul>
-                        <li><a href="/TrashTrace_Duplicate/driver_dashboard.php" class="nav-link <?php echo $current_page === 'driver_dashboard.php' ? 'active' : ''; ?>">
+                        <li><a href="/driver_dashboard.php" class="nav-link <?php echo $current_page === 'driver_dashboard.php' ? 'active' : ''; ?>">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a></li>
-                        <li><a href="/TrashTrace_Duplicate/driver/assignments.php" class="nav-link <?php echo $current_page === 'assignments.php' ? 'active' : ''; ?>">
+                        <li><a href="/driver/assignments.php" class="nav-link <?php echo $current_page === 'assignments.php' ? 'active' : ''; ?>">
                             <i class="fas fa-tasks"></i>
                             <span>Assignments</span>
                         </a></li>
-                        <li><a href="/TrashTrace_Duplicate/driver/routes.php" class="nav-link <?php echo $current_page === 'routes.php' ? 'active' : ''; ?>">
+                        <li><a href="/driver/routes.php" class="nav-link <?php echo $current_page === 'routes.php' ? 'active' : ''; ?>">
                             <i class="fas fa-route"></i>
                             <span>Routes</span>
                         </a></li>
-                        <li><a href="/TrashTrace_Duplicate/driver/collections.php" class="nav-link <?php echo $current_page === 'collections.php' ? 'active' : ''; ?>">
+                        <li><a href="/driver/collections.php" class="nav-link <?php echo $current_page === 'collections.php' ? 'active' : ''; ?>">
                             <i class="fas fa-trash"></i>
                             <span>Collections</span>
                         </a></li>
-                        <li><a href="/TrashTrace_Duplicate/driver/earnings.php" class="nav-link <?php echo $current_page === 'earnings.php' ? 'active' : ''; ?>">
+                        <li><a href="/driver/earnings.php" class="nav-link <?php echo $current_page === 'earnings.php' ? 'active' : ''; ?>">
                             <i class="fas fa-money-bill-wave"></i>
                             <span>Earnings</span>
                         </a></li>
-                        <li><a href="/TrashTrace_Duplicate/driver/profile.php" class="nav-link <?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
+                        <li><a href="/driver/profile.php" class="nav-link <?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
                             <i class="fas fa-user"></i>
                             <span>Profile</span>
                         </a></li>
@@ -101,7 +101,7 @@ $base_path = '/TrashTrace_Duplicate/';
             </nav>
         <?php endif; ?>
         <div class="header-actions">
-            <a href="logout.php" class="logout-btn">
+            <a href="<?php echo $base_path; ?>logout.php" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </a>
