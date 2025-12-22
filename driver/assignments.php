@@ -280,6 +280,152 @@ function generateMonthSchedules($month, $barangay = "") {
     <link rel="stylesheet" href="../css/driver/master-styles.css">
     
     <style>
+        /* Navbar enhancements - Improved visibility and glow */
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            color: #2e7d32;
+            text-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .logo i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover i {
+            text-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .nav-link {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: #2c3e50;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.4);
+            color: #2c3e50;
+        }
+
+        .nav-link:hover::before {
+            opacity: 1;
+        }
+
+        .nav-link:hover i,
+        .nav-link:hover span {
+            color: #2c3e50;
+            text-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
+            filter: drop-shadow(0 0 8px rgba(46, 125, 50, 0.4));
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95), rgba(241, 248, 233, 0.9));
+            border-color: rgba(76, 175, 80, 0.4);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+            color: #2c3e50;
+        }
+
+        .nav-link.active::before {
+            opacity: 1;
+        }
+
+        .nav-link.active i,
+        .nav-link.active span {
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(46, 125, 50, 0.4);
+        }
+
+        .nav-link i {
+            color: #4caf50;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link span {
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        .user-info {
+            background: rgba(248, 253, 249, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+
+        .user-name {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .user-id {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .btn-logout {
+            background: rgba(248, 253, 249, 0.9);
+            border: 1px solid rgba(232, 245, 233, 0.7);
+            border-radius: 12px;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+        }
+
+        .btn-logout:hover i {
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
         .driver-barangay-info {
             background: linear-gradient(135deg, #e3f2fd, #bbdefb);
             border-radius: 12px;
@@ -711,49 +857,7 @@ function generateMonthSchedules($month, $barangay = "") {
 </head>
 <body>
     <div class="dashboard-container">
-        <header class="dashboard-header">
-            <div class="grid-background-nav"></div>
-            
-            <div class="header-content">
-                <a href="../driver_dashboard.php" class="logo">
-                    <i class="fas fa-recycle"></i>
-                    <span>TrashTrace Driver</span>
-                </a>
-                
-                <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <nav id="mainNav">
-                    <div class="nav-container">
-                        <ul>
-                            <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                            <li><a href="assignments.php" class="nav-link active"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
-                            <li><a href="routes.php" class="nav-link"><i class="fas fa-route"></i> <span>Routes</span></a></li>
-                            <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
-                            <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
-                          
-                            <li><a href="profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
-                        </ul>
-                    </div>
-                </nav>
-                
-                <div class="user-menu">
-                    <div class="user-info" onclick="window.location.href='profile.php'">
-                        <div class="user-avatar">
-                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
-                        </div>
-                        <div class="user-details">
-                            <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
-                            <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
-                        </div>
-                    </div>
-                    <a href="../logout.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <?php include '../includes/header.php'; ?>
         
         <main class="dashboard-main">
             <div class="container">

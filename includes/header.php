@@ -1,18 +1,36 @@
-<?php
+ <?php
 // Shared header/navbar
 $current_page = basename($_SERVER['PHP_SELF']);
 $user_type = $_SESSION['user_type'] ?? '';
+$current_dir = dirname($_SERVER['PHP_SELF']);
+$is_driver_page = strpos($current_dir, '/driver') !== false || $current_page === 'driver_dashboard.php';
+$base_path = '/TrashTrace_Duplicate/';
 ?>
 <header class="dashboard-header">
+    <div class="grid-background-nav"></div>
+    
     <div class="header-content">
-        <div class="logo">
-            <img src="assets/images/trashtrace logo green.png" alt="TrashTrace Logo" class="logo-img">
-            <?php if($user_type === 'admin'): ?>
-            <span class="portal-label">Admin Portal</span>
-            <?php endif; ?>
-        </div>
-        <nav class="main-nav">
-            <ul>
+        <?php if($user_type === 'driver'): ?>
+            <a href="<?php echo $base_path; ?>driver_dashboard.php" class="logo">
+                <i class="fas fa-recycle"></i>
+                <span>TrashTrace Driver</span>
+            </a>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav id="mainNav">
+                <div class="nav-container">
+                    <ul>
+        <?php else: ?>
+            <div class="logo">
+                <img src="assets/images/trashtrace logo green.png" alt="TrashTrace Logo" class="logo-img">
+                <?php if($user_type === 'admin'): ?>
+                <span class="portal-label">Admin Portal</span>
+                <?php endif; ?>
+            </div>
+            <nav class="main-nav">
+                <ul>
+        <?php endif; ?>
                 <?php if($user_type === 'admin'): ?>
                     <li><a href="barangay_dashboard.php" class="nav-link <?php echo $current_page === 'barangay_dashboard.php' ? 'active' : ''; ?>">
                         <i class="fas fa-th-large"></i>
@@ -33,6 +51,32 @@ $user_type = $_SESSION['user_type'] ?? '';
                     <li><a href="barangay_reports.php" class="nav-link <?php echo $current_page === 'barangay_reports.php' ? 'active' : ''; ?>">
                         <i class="far fa-chart-bar"></i>
                         <span>Reports</span>
+                    </a></li>
+                <?php elseif($user_type === 'driver'): ?>
+                    <li><a href="<?php echo $base_path; ?>driver_dashboard.php" class="nav-link <?php echo $current_page === 'driver_dashboard.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+   
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/assignments.php" class="nav-link <?php echo $current_page === 'assignments.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/routes.php" class="nav-link <?php echo $current_page === 'routes.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-route"></i>
+                        <span>Routes</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/collections.php" class="nav-link active">
+                        <i class="fas fa-trash"></i>
+                        <span>Collections</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/earnings.php" class="nav-link <?php echo $current_page === 'earnings.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Earnings</span>
+                    </a></li>
+                    <li><a href="<?php echo $base_path; ?>driver/profile.php" class="nav-link <?php echo $current_page === 'profile.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
                     </a></li>
                 <?php else: ?>
                     <li><a href="dashboard.php" class="nav-link <?php echo $current_page === 'dashboard.php' ? 'active' : ''; ?>">

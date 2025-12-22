@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+define('BASE_PATH', '/TrashTrace_Duplicate/');
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');

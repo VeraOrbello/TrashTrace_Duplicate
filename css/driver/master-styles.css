@@ -205,7 +205,6 @@ body {
 /* Remove old navbar styles */
 .grid-background-nav,
 .mobile-menu-toggle,
-.nav-container,
 .user-menu,
 .user-info,
 .user-avatar,
@@ -214,6 +213,31 @@ body {
 .user-id,
 .btn-logout {
     display: none;
+}
+
+/* Driver navbar styles */
+#mainNav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+#mainNav .nav-container {
+    display: flex;
+    justify-content: center;
+}
+
+#mainNav .nav-container ul {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+}
+
+#mainNav .nav-container ul li {
+    margin: 0;
 }
 
 /* Main Content - ENHANCED DASHBOARD STYLES */

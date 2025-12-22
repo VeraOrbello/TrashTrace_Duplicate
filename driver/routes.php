@@ -1166,51 +1166,7 @@ if(isset($_POST['complete_route']) && isset($_POST['route_id'])) {
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Header Section -->
-        <header class="dashboard-header">
-            <!-- Grid Background Pattern -->
-            <div class="grid-background-nav"></div>
-            
-            <div class="header-content">
-                <a href="../driver_dashboard.php" class="logo">
-                    <i class="fas fa-recycle"></i>
-                    <span>Trash<span style="font-weight: 700;">Trace</span></span>
-                </a>
-                
-                <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <nav id="mainNav">
-                    <div class="nav-container">
-                        <ul>
-                            <li><a href="../driver_dashboard.php" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                            <li><a href="assignments.php" class="nav-link"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
-                            <li><a href="routes.php" class="nav-link active"><i class="fas fa-route"></i> <span>Routes</span></a></li>
-                            <li><a href="collections.php" class="nav-link"><i class="fas fa-trash"></i> <span>Collections</span></a></li>
-                            <li><a href="earnings.php" class="nav-link"><i class="fas fa-money-bill-wave"></i> <span>Earnings</span></a></li>
-                         
-                            <li><a href="profile.php" class="nav-link"><i class="fas fa-user"></i> <span>Profile</span></a></li>
-                        </ul>
-                    </div>
-                </nav>
-                
-                <div class="user-menu">
-                    <div class="user-info" onclick="window.location.href='profile.php'">
-                        <div class="user-avatar">
-                            <?php echo strtoupper(substr($driver_name, 0, 1)); ?>
-                        </div>
-                        <div class="user-details">
-                            <span class="user-name"><?php echo htmlspecialchars($driver_name); ?></span>
-                            <span class="user-id">ID: #<?php echo str_pad($driver_id, 4, '0', STR_PAD_LEFT); ?></span>
-                        </div>
-                    </div>
-                    <a href="../logout.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <?php include '../includes/header.php'; ?>
         
         <main class="dashboard-main">
             <!-- Grid Background Pattern -->
