@@ -1,3 +1,0 @@
-- [ ] Update BASE_PATH in config.php from '/TrashTrace_Duplicate/' to '/'
-- [ ] Update $base_path in includes/header.php from '/TrashTrace_Duplicate/' to '/'
-- [ ] Remove '/TrashTrace_Duplicate/' from all hardcoded href links in includes/header.php
