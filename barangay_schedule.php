@@ -175,6 +175,192 @@ if($stmt = $pdo->prepare($sql)){
         console.log('User City:', userCity);
         console.log('Number of schedules:', schedules.length);
         console.log('Schedules:', schedules);
+        // Add this to your existing JavaScript in barangay_schedule.php
+
+// Auto-sync functionality
+let autoSyncInterval;
+let lastSyncTime = null;
+
+function startAutoSync() {
+    // Clear any existing interval
+    if(autoSyncInterval) {
+        clearInterval(autoSyncInterval);
+    }
+    
+    // Sync every 30 seconds
+    autoSyncInterval = setInterval(syncWithDrivers, 30000);
+    
+    // Initial sync
+    syncWithDrivers();
+}
+
+function syncWithDrivers() {
+    console.log('Syncing with drivers...');
+    
+    fetch('admin_sync.php?action=get_assignment_stats')
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                lastSyncTime = new Date();
+                updateSyncStatus(data);
+                
+                // Update calendar if needed
+                if(shouldUpdateCalendar(data)) {
+                    updateSchedulesForMonth();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Sync error:', error);
+        });
+}
+
+function updateSyncStatus(data) {
+    const syncIndicator = document.getElementById('sync-indicator') || createSyncIndicator();
+    
+    syncIndicator.innerHTML = `
+        <span style="color: #4caf50;">
+            <i class="fas fa-sync-alt"></i> Synced ${formatTimeAgo(lastSyncTime)}
+        </span>
+        <small style="color: #666; margin-left: 10px;">
+            ${data.today?.total || 0} assignments today
+        </small>
+    `;
+}
+
+function createSyncIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'sync-indicator';
+    indicator.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        padding: 10px 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+        font-size: 0.9rem;
+    `;
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+function formatTimeAgo(date) {
+    if(!date) return 'just now';
+    
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    if(seconds < 60) return `${seconds} sec ago`;
+    if(seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    return `${Math.floor(seconds / 3600)} hour${Math.floor(seconds / 3600) > 1 ? 's' : ''} ago`;
+}
+
+function shouldUpdateCalendar(data) {
+    // Check if calendar needs update based on changes
+    // This is a simplified check - you might want to implement more sophisticated logic
+    return false;
+}
+
+// Add driver assignment functionality to day details
+function showDriverAssignmentOptions(dateString) {
+    // Fetch available drivers for this barangay
+    fetch(`get_available_drivers.php?date=${dateString}&barangay=${userBarangay}`)
+        .then(response => response.json())
+        .then(drivers => {
+            if(drivers.length > 0) {
+                showDriverAssignmentModal(dateString, drivers);
+            } else {
+                showToast('No drivers available for this date', 'warning');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching drivers:', error);
+            showToast('Error loading drivers', 'error');
+        });
+}
+
+function showDriverAssignmentModal(dateString, drivers) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Assign Driver</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Assign a driver for ${new Date(dateString).toLocaleDateString()}</p>
+                <select id="driver-select" class="form-select" style="width: 100%; margin: 10px 0;">
+                    ${drivers.map(driver => `
+                        <option value="${driver.id}">${driver.full_name} (${driver.vehicle || 'No vehicle'})</option>
+                    `).join('')}
+                </select>
+                <div class="form-actions">
+                    <button class="btn" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button class="btn btn-action" onclick="assignDriver('${dateString}')">Assign</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('.close-modal').addEventListener('click', () => modal.remove());
+    modal.style.display = 'block';
+    
+    modal.addEventListener('click', function(e) {
+        if(e.target === modal) modal.remove();
+    });
+}
+
+function assignDriver(dateString) {
+    const driverId = document.getElementById('driver-select').value;
+    const driverName = document.getElementById('driver-select').selectedOptions[0].text;
+    
+    fetch('admin_sync.php?action=assign_driver_to_schedule', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            schedule_date: dateString,
+            driver_id: driverId,
+            barangay: userBarangay
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            showToast(`Assigned ${driverName} successfully`, 'success');
+            document.querySelector('.modal').remove();
+            updateSchedulesForMonth();
+        } else {
+            showToast('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Network error', 'error');
+    });
+}
+
+// Start auto-sync when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Add a small delay to ensure everything is loaded
+    setTimeout(startAutoSync, 2000);
+    
+    // Add sync button to calendar header
+    const calendarHeader = document.querySelector('.calendar-header');
+    if(calendarHeader) {
+        const syncBtn = document.createElement('button');
+        syncBtn.className = 'btn btn-outline';
+        syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sync Now';
+        syncBtn.style.marginLeft = '10px';
+        syncBtn.onclick = syncWithDrivers;
+        calendarHeader.querySelector('.header-actions').appendChild(syncBtn);
+    }
+});
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="js/barangay_schedule.js"></script>

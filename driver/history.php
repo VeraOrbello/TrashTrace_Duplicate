@@ -19,7 +19,7 @@ $driver_name = $_SESSION["full_name"];
 $filter_status = $_GET['status'] ?? 'all';
 $filter_date = $_GET['date'] ?? 'all';
 $filter_waste = $_GET['waste'] ?? 'all';
-$filter_type = $_GET['type'] ?? 'all'; // New: collection or route
+$filter_type = $_GET['type'] ?? 'all'; // collection or route
 $search = $_GET['search'] ?? '';
 
 // Fetch collections history
@@ -107,55 +107,53 @@ try {
     $collections_history = generateSampleCollections();
 }
 
-// Fetch completed routes history
+// Fetch completed routes history from routes_history table
 $routes_history = [];
 
 try {
     if($filter_type === 'all' || $filter_type === 'route') {
         $sql = "SELECT 
-                    r.*,
-                    'route' as type,
-                    a.zone_name,
-                    a.area,
-                    COUNT(DISTINCT c.id) as collections_count,
-                    SUM(c.weight_kg) as total_weight,
-                    SUM(c.payment_amount) as total_amount
-                FROM routes r
-                LEFT JOIN assignments a ON r.assignment_id = a.id
-                LEFT JOIN collections c ON c.assignment_id = a.id AND c.driver_id = ?
-                WHERE r.driver_id = ? AND r.status = 'completed'";
+                    rh.*,
+                    dda.barangay,
+                    dda.zones,
+                    'route' as type
+                FROM routes_history rh
+                LEFT JOIN driver_daily_assignments dda ON rh.assignment_id = dda.id
+                WHERE rh.driver_id = ?";
         
-        $params = [$driver_id, $driver_id];
-        $types = "ii";
+        $params = [$driver_id];
+        $types = "i";
         
+        // Apply filters for routes
         if($filter_date !== 'all') {
             $today = date('Y-m-d');
             if($filter_date === 'today') {
-                $sql .= " AND DATE(r.completed_at) = ?";
+                $sql .= " AND DATE(rh.completed_at) = ?";
                 $params[] = $today;
                 $types .= "s";
             } elseif($filter_date === 'week') {
                 $week_ago = date('Y-m-d', strtotime('-7 days'));
-                $sql .= " AND DATE(r.completed_at) >= ?";
+                $sql .= " AND DATE(rh.completed_at) >= ?";
                 $params[] = $week_ago;
                 $types .= "s";
             } elseif($filter_date === 'month') {
                 $month_ago = date('Y-m-d', strtotime('-30 days'));
-                $sql .= " AND DATE(r.completed_at) >= ?";
+                $sql .= " AND DATE(rh.completed_at) >= ?";
                 $params[] = $month_ago;
                 $types .= "s";
             }
         }
         
         if(!empty($search)) {
-            $sql .= " AND (r.route_name LIKE ? OR a.zone_name LIKE ?)";
+            $sql .= " AND (rh.route_name LIKE ? OR rh.barangay LIKE ? OR rh.start_point LIKE ?)";
             $search_term = "%$search%";
             $params[] = $search_term;
             $params[] = $search_term;
-            $types .= "ss";
+            $params[] = $search_term;
+            $types .= "sss";
         }
         
-        $sql .= " GROUP BY r.id ORDER BY r.completed_at DESC";
+        $sql .= " ORDER BY rh.completed_at DESC";
         
         if($stmt = mysqli_prepare($link, $sql)){
             if(!empty($params)) {
@@ -164,7 +162,32 @@ try {
             if(mysqli_stmt_execute($stmt)){
                 $result = mysqli_stmt_get_result($stmt);
                 while($row = mysqli_fetch_assoc($result)){
-                    $routes_history[] = $row;
+                    // Format the data to match your existing structure
+                    $formatted_row = [
+                        'id' => $row['id'],
+                        'route_name' => $row['route_name'] ?: 'Route #' . $row['id'],
+                        'completed_at' => $row['completed_at'],
+                        'start_point' => $row['start_point'] ?: 'Start Location',
+                        'end_point' => $row['end_point'] ?: 'End Location',
+                        'distance_km' => $row['distance_km'] ?: '0.0',
+                        'estimated_time_minutes' => $row['estimated_time_minutes'] ?: '0',
+                        'actual_time_minutes' => $row['actual_time_minutes'] ?: '0',
+                        'total_stops' => $row['total_stops'] ?: 0,
+                        'completed_stops' => $row['completed_stops'] ?: 0,
+                        'total_weight' => $row['total_weight'] ?: 0.00,
+                        'collections_count' => $row['collections_count'] ?: 0,
+                        'total_amount' => ($row['total_weight'] ?: 0) * 5, // ₱5 per kg
+                        'zone_name' => $row['zones'] ?: 'Zone A',
+                        'area' => $row['barangay'] ?: 'Cebu City',
+                        'barangay' => $row['barangay'] ?: 'Cebu City',
+                        'zones' => $row['zones'] ?: '',
+                        'notes' => $row['notes'] ?: '',
+                        'driver_rating' => $row['driver_rating'] ?: 0.00,
+                        'status' => 'completed',
+                        'type' => 'route'
+                    ];
+                    
+                    $routes_history[] = $formatted_row;
                 }
             }
             mysqli_stmt_close($stmt);
@@ -172,8 +195,22 @@ try {
     }
 } catch(Exception $e) {
     error_log("Routes history error: " . $e->getMessage());
-    // Generate sample data for demo
-    $routes_history = generateSampleRoutes();
+    
+    // Fallback 1: Check session data
+    if(isset($_SESSION['completed_routes']) && !empty($_SESSION['completed_routes'])) {
+        $routes_history = $_SESSION['completed_routes'];
+        // Convert session data to proper format
+        foreach($routes_history as &$route) {
+            $route['type'] = 'route';
+            $route['barangay'] = $route['barangay'] ?? 'Cebu City';
+            $route['zones'] = $route['zone_name'] ?? '';
+            $route['total_stops'] = $route['collections_count'] ?? 0;
+            $route['completed_stops'] = $route['collections_count'] ?? 0;
+        }
+    } else {
+        // Fallback 2: Generate sample data
+        $routes_history = generateSampleRoutes();
+    }
 }
 
 // Combine both histories for display
@@ -188,8 +225,8 @@ if($filter_type === 'all') {
 
 // Sort by date (newest first)
 usort($history_data, function($a, $b) {
-    $dateA = $a['type'] === 'collection' ? $a['collection_date'] : $a['completed_at'];
-    $dateB = $b['type'] === 'collection' ? $b['collection_date'] : $b['completed_at'];
+    $dateA = $a['type'] === 'collection' ? ($a['collection_date'] ?? '') : ($a['completed_at'] ?? '');
+    $dateB = $b['type'] === 'collection' ? ($b['collection_date'] ?? '') : ($b['completed_at'] ?? '');
     return strtotime($dateB) - strtotime($dateA);
 });
 
@@ -238,7 +275,7 @@ function generateSampleRoutes() {
         $total_amount = $total_weight * 5;
         
         $sample_data[] = [
-            'id' => $i + 1000, // Different ID range for routes
+            'id' => $i + 1000,
             'route_name' => $route_names[array_rand($route_names)],
             'completed_at' => date('Y-m-d H:i:s', strtotime("-$days_ago days")),
             'start_point' => $areas[array_rand($areas)],
@@ -250,8 +287,15 @@ function generateSampleRoutes() {
             'total_amount' => $total_amount,
             'zone_name' => 'Zone ' . chr(65 + ($i % 5)),
             'area' => $areas[array_rand($areas)],
+            'barangay' => $areas[array_rand($areas)],
+            'zones' => 'Zone ' . chr(65 + ($i % 5)),
             'status' => 'completed',
-            'type' => 'route'
+            'type' => 'route',
+            'total_stops' => $collections_count,
+            'completed_stops' => $collections_count,
+            'estimated_time_minutes' => rand(90, 240),
+            'actual_time_minutes' => rand(85, 235),
+            'driver_rating' => rand(35, 50) / 10 // 3.5 to 5.0
         ];
     }
     
@@ -570,6 +614,88 @@ function generateSampleRoutes() {
             font-size: 0.7rem;
         }
         
+        .route-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .route-details div {
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .route-details i {
+            color: #4caf50;
+            width: 16px;
+        }
+        
+        .history-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .stat-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .history-icon.route {
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+            color: white;
+        }
+        
+        .history-icon.collection {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+        }
+        
+        .history-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .history-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .amount-display {
+            text-align: right;
+        }
+        
+        .amount {
+            font-weight: 600;
+            color: #2e7d32;
+            font-size: 1.1rem;
+        }
+        
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -597,6 +723,26 @@ function generateSampleRoutes() {
         .btn-view:hover {
             background: #bbdefb;
             transform: translateY(-2px);
+        }
+        
+        .btn-view-route {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2e7d32;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-view-route:hover {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .btn-view-notes {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ff9800;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-view-notes:hover {
+            background: rgba(255, 193, 7, 0.2);
         }
         
         .btn-print {
@@ -737,49 +883,166 @@ function generateSampleRoutes() {
             padding-bottom: 20px;
         }
         
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        /* Modal Styles */
-        .modal {
-            display: none;
+        .status-completed {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2e7d32;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ff9800;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .status-cancelled {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        
+        /* Modal Overlay */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-            animation: fadeIn 0.3s ease;
+            z-index: 1000;
+            display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8fdf9, #f0f9f4);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            color: #f44336;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f9f9f9;
+        }
+        
+        .route-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .info-item {
+            padding: 15px;
+            background: #f8fdf9;
+            border-radius: 12px;
+            border: 1px solid #e8f5e9;
+        }
+        
+        .info-item.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .info-label i {
+            width: 16px;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .notes-content {
+            padding: 15px;
+            background: #f8fdf9;
+            border-radius: 12px;
+            border: 1px solid #e8f5e9;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #555;
         }
         
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
-        
-        .modal-content {
-            position: relative;
-            background: white;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease;
-            overflow-y: auto;
         }
         
         @keyframes slideUp {
@@ -793,64 +1056,15 @@ function generateSampleRoutes() {
             }
         }
         
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-            transition: color 0.3s ease;
-            background: none;
-            border: none;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        
-        .modal-close:hover {
-            color: #ff4757;
-            background: rgba(0, 0, 0, 0.05);
-        }
-        
-        #modal-title {
-            color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .route-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .route-stat-item {
-            padding: 15px;
-            background: #f8fdf9;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .route-stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2e7d32;
-            margin-bottom: 5px;
-        }
-        
-        .route-stat-label {
-            font-size: 0.85rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         @media (max-width: 768px) {
@@ -883,6 +1097,10 @@ function generateSampleRoutes() {
             .btn-action {
                 padding: 6px 10px;
                 font-size: 0.8rem;
+            }
+            
+            .route-info-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1109,87 +1327,144 @@ function generateSampleRoutes() {
                                     </thead>
                                     <tbody>
                                         <?php foreach($history_data as $item): ?>
-                                            <tr>
-                                                <td>
-                                                    <?php if($item['type'] === 'collection'): ?>
+                                            <?php if($item['type'] === 'route'): ?>
+                                                <!-- Route History Row -->
+                                                <tr>
+                                                    <td>
+                                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                                            <div class="history-icon route">
+                                                                <i class="fas fa-route"></i>
+                                                            </div>
+                                                            <div>
+                                                                <strong><?php echo htmlspecialchars($item['route_name']); ?></strong>
+                                                                <div class="history-meta">
+                                                                    <span><i class="fas fa-calendar"></i> <?php echo date('M d, Y', strtotime($item['completed_at'])); ?></span>
+                                                                    <span><i class="fas fa-clock"></i> <?php echo date('h:i A', strtotime($item['completed_at'])); ?></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="route-details">
+                                                            <div><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($item['start_point']); ?></div>
+                                                            <div><i class="fas fa-flag-checkered"></i> <?php echo htmlspecialchars($item['end_point']); ?></div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="history-stats">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Distance:</span>
+                                                                <span class="stat-value"><?php echo $item['distance_km']; ?> km</span>
+                                                            </div>
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Time:</span>
+                                                                <span class="stat-value"><?php echo $item['actual_time_minutes']; ?> min</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="history-stats">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Stops:</span>
+                                                                <span class="stat-value"><?php echo $item['completed_stops']; ?>/<?php echo $item['total_stops']; ?></span>
+                                                            </div>
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Weight:</span>
+                                                                <span class="stat-value"><?php echo number_format($item['total_weight'], 2); ?> kg</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="amount-display">
+                                                            <span class="amount">₱<?php echo number_format($item['total_amount'] ?? ($item['total_weight'] * 5), 2); ?></span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="status-badge status-completed">
+                                                            <i class="fas fa-check-circle"></i> Completed
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-buttons">
+                                                            <button class="btn-action btn-view-route view-route" 
+                                                                    data-route-id="<?php echo $item['id']; ?>"
+                                                                    data-route-name="<?php echo htmlspecialchars($item['route_name']); ?>"
+                                                                    data-distance="<?php echo $item['distance_km']; ?>"
+                                                                    data-time="<?php echo $item['actual_time_minutes']; ?>"
+                                                                    data-stops="<?php echo $item['completed_stops']; ?>/<?php echo $item['total_stops']; ?>"
+                                                                    data-weight="<?php echo number_format($item['total_weight'], 2); ?> kg"
+                                                                    data-amount="₱<?php echo number_format($item['total_amount'] ?? ($item['total_weight'] * 5), 2); ?>"
+                                                                    data-barangay="<?php echo htmlspecialchars($item['barangay']); ?>"
+                                                                    data-zones="<?php echo htmlspecialchars($item['zones']); ?>"
+                                                                    data-completed="<?php echo date('F j, Y, g:i A', strtotime($item['completed_at'])); ?>">
+                                                                <i class="fas fa-eye"></i> View
+                                                            </button>
+                                                            <?php if($item['notes']): ?>
+                                                                <button class="btn-action btn-view-notes view-notes" data-notes="<?php echo htmlspecialchars($item['notes']); ?>">
+                                                                    <i class="fas fa-sticky-note"></i> Notes
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php else: ?>
+                                                <!-- Collection History Row -->
+                                                <tr>
+                                                    <td>
                                                         <span class="history-type type-collection">
                                                             <i class="fas fa-trash-alt"></i> Collection
                                                         </span>
-                                                    <?php else: ?>
-                                                        <span class="history-type type-route">
-                                                            <i class="fas fa-route"></i> Route
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <div style="font-weight: 500;">
-                                                        <?php 
-                                                        $date = $item['type'] === 'collection' ? $item['collection_date'] : $item['completed_at'];
-                                                        echo date('M d, Y', strtotime($date)); 
-                                                        ?>
-                                                    </div>
-                                                    <div style="font-size: 0.8rem; color: #999;">
-                                                        <?php echo date('h:i A', strtotime($date)); ?>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <?php if($item['type'] === 'collection'): ?>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-weight: 500;">
+                                                            <?php echo date('M d, Y', strtotime($item['collection_date'])); ?>
+                                                        </div>
+                                                        <div style="font-size: 0.8rem; color: #999;">
+                                                            <?php echo date('h:i A', strtotime($item['collection_date'])); ?>
+                                                        </div>
+                                                    </td>
+                                                    <td>
                                                         <div style="font-weight: 500;"><?php echo htmlspecialchars($item['customer_name']); ?></div>
                                                         <div style="font-size: 0.8rem; color: #999;">
                                                             <?php echo htmlspecialchars($item['waste_type']); ?> • 
                                                             <?php echo htmlspecialchars($item['customer_phone']); ?>
                                                         </div>
-                                                    <?php else: ?>
-                                                        <div style="font-weight: 500;"><?php echo htmlspecialchars($item['route_name']); ?></div>
-                                                        <div style="font-size: 0.8rem; color: #999;">
-                                                            <?php echo htmlspecialchars($item['start_point'] ?? 'N/A'); ?> → 
-                                                            <?php echo htmlspecialchars($item['end_point'] ?? 'N/A'); ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <div style="font-weight: 500;"><?php echo htmlspecialchars($item['zone_name'] ?? 'N/A'); ?></div>
-                                                    <div style="font-size: 0.8rem; color: #999;"><?php echo htmlspecialchars($item['area'] ?? ''); ?></div>
-                                                </td>
-                                                <td>
-                                                    <?php if($item['type'] === 'collection'): ?>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-weight: 500;"><?php echo htmlspecialchars($item['zone_name'] ?? 'N/A'); ?></div>
+                                                        <div style="font-size: 0.8rem; color: #999;"><?php echo htmlspecialchars($item['area'] ?? ''); ?></div>
+                                                    </td>
+                                                    <td>
                                                         <div style="font-weight: 600; color: #2e7d32;">
                                                             <?php echo number_format($item['weight_kg'], 1); ?> kg
                                                         </div>
                                                         <div style="font-size: 0.8rem; color: #ff9800;">
                                                             ₱<?php echo number_format($item['payment_amount'], 2); ?>
                                                         </div>
-                                                    <?php else: ?>
-                                                        <div style="font-weight: 600; color: #2e7d32;">
-                                                            <?php echo $item['collections_count']; ?> collections
-                                                        </div>
-                                                        <div style="font-size: 0.8rem; color: #2196f3;">
-                                                            <?php echo $item['distance_km']; ?> km • <?php echo $item['estimated_time']; ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <span class="status-badge status-<?php echo htmlspecialchars($item['status']); ?>">
-                                                        <?php echo ucfirst($item['status']); ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <button class="btn-action btn-view view-details" 
-                                                                data-id="<?php echo $item['id']; ?>" 
-                                                                data-type="<?php echo $item['type']; ?>">
-                                                            <i class="fas fa-eye"></i> View
-                                                        </button>
-                                                        <?php if($item['status'] == 'completed'): ?>
-                                                            <button class="btn-action btn-print print-receipt" 
+                                                    </td>
+                                                    <td>
+                                                        <span class="status-badge status-<?php echo htmlspecialchars($item['status']); ?>">
+                                                            <?php echo ucfirst($item['status']); ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-buttons">
+                                                            <button class="btn-action btn-view view-details" 
                                                                     data-id="<?php echo $item['id']; ?>" 
                                                                     data-type="<?php echo $item['type']; ?>">
-                                                                <i class="fas fa-print"></i> Print
+                                                                <i class="fas fa-eye"></i> View
                                                             </button>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                                            <?php if($item['status'] == 'completed'): ?>
+                                                                <button class="btn-action btn-print print-receipt" 
+                                                                        data-id="<?php echo $item['id']; ?>" 
+                                                                        data-type="<?php echo $item['type']; ?>">
+                                                                    <i class="fas fa-print"></i> Print
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
@@ -1210,17 +1485,6 @@ function generateSampleRoutes() {
                 </div>
             </div>
         </main>
-        
-        <!-- Details Modal -->
-        <div class="modal" id="detailsModal">
-            <div class="modal-content">
-                <button class="modal-close" id="closeModal">×</button>
-                <h3 id="modal-title"><i class="fas fa-info-circle"></i> Details</h3>
-                <div id="modalContent">
-                    <!-- Content will be loaded here -->
-                </div>
-            </div>
-        </div>
     </div>
     
     <script>
@@ -1296,14 +1560,15 @@ function generateSampleRoutes() {
                 }, 500);
             });
             
-            // View Details
+            // View collection details
             document.querySelectorAll('.view-details').forEach(button => {
                 button.addEventListener('click', function() {
                     const itemId = this.getAttribute('data-id');
                     const itemType = this.getAttribute('data-type');
                     
                     // Show loading state
-                    document.getElementById('modalContent').innerHTML = `
+                    const modal = createModal();
+                    modal.querySelector('.modal-body').innerHTML = `
                         <div style="text-align: center; padding: 40px 0;">
                             <div class="loader" style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #4caf50; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
                             <p>Loading details...</p>
@@ -1317,17 +1582,42 @@ function generateSampleRoutes() {
                     `;
                     
                     // Show modal
-                    document.getElementById('detailsModal').style.display = 'flex';
+                    document.body.appendChild(modal);
                     
                     // Simulate API call with different content for collection vs route
                     setTimeout(() => {
                         if(itemType === 'collection') {
-                            document.getElementById('modalContent').innerHTML = getCollectionDetails(itemId);
+                            modal.querySelector('.modal-body').innerHTML = getCollectionDetails(itemId);
                         } else {
-                            document.getElementById('modalContent').innerHTML = getRouteDetails(itemId);
+                            modal.querySelector('.modal-body').innerHTML = getCollectionDetails(itemId);
                         }
                     }, 500);
                 });
+            });
+            
+            // View route details
+            document.addEventListener('click', function(e) {
+                if(e.target.closest('.view-route')) {
+                    const btn = e.target.closest('.view-route');
+                    const routeData = {
+                        name: btn.dataset.routeName,
+                        distance: btn.dataset.distance,
+                        time: btn.dataset.time,
+                        stops: btn.dataset.stops,
+                        weight: btn.dataset.weight,
+                        amount: btn.dataset.amount,
+                        barangay: btn.dataset.barangay,
+                        zones: btn.dataset.zones,
+                        completed: btn.dataset.completed
+                    };
+                    
+                    showRouteDetailsModal(routeData);
+                }
+                
+                if(e.target.closest('.view-notes')) {
+                    const btn = e.target.closest('.view-notes');
+                    showNotesModal(btn.dataset.notes);
+                }
             });
             
             // Print Receipt
@@ -1340,18 +1630,6 @@ function generateSampleRoutes() {
                         window.open(`receipt.php?type=${itemType}&id=${itemId}`, '_blank');
                     }
                 });
-            });
-            
-            // Close Modal
-            document.getElementById('closeModal').addEventListener('click', function() {
-                document.getElementById('detailsModal').style.display = 'none';
-            });
-            
-            // Close modal when clicking outside
-            document.getElementById('detailsModal').addEventListener('click', function(e) {
-                if(e.target === this) {
-                    this.style.display = 'none';
-                }
             });
             
             // Auto-submit form on filter change
@@ -1380,6 +1658,34 @@ function generateSampleRoutes() {
                 }, 500);
             });
         });
+        
+        function createModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-info-circle"></i> Details</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline close-modal">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            // Close modal events
+            modal.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => modal.remove());
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) modal.remove();
+            });
+            
+            return modal;
+        }
         
         function getCollectionDetails(id) {
             return `
@@ -1410,7 +1716,7 @@ function generateSampleRoutes() {
                         <div>
                             <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Waste Type</div>
                             <div>
-                                <span class="waste-badge waste-plastic">Plastic</span>
+                                <span style="display: inline-block; padding: 4px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 20px; font-size: 0.85rem;">Plastic</span>
                             </div>
                         </div>
                         <div>
@@ -1467,114 +1773,139 @@ function generateSampleRoutes() {
             `;
         }
         
-        function getRouteDetails(id) {
-            return `
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- Header -->
-                    <div style="background: #f8fdf9; padding: 20px; border-radius: 12px; border-left: 4px solid #2196f3;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <div style="font-size: 1.2rem; font-weight: 600; color: #2c3e50; margin-bottom: 5px;">Route #${String(id).padStart(6, '0')}</div>
-                                <div style="font-size: 0.9rem; color: #666;">Completed on ${new Date().toLocaleDateString()}</div>
-                            </div>
-                            <span class="status-badge status-completed">Completed</span>
-                        </div>
+        function showRouteDetailsModal(route) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-route"></i> Route Details</h3>
+                        <button class="close-modal">&times;</button>
                     </div>
-                    
-                    <!-- Route Stats -->
-                    <div class="route-stats">
-                        <div class="route-stat-item">
-                            <div class="route-stat-value">8.5 km</div>
-                            <div class="route-stat-label">Distance</div>
-                        </div>
-                        <div class="route-stat-item">
-                            <div class="route-stat-value">2h 15m</div>
-                            <div class="route-stat-label">Duration</div>
-                        </div>
-                        <div class="route-stat-item">
-                            <div class="route-stat-value">15</div>
-                            <div class="route-stat-label">Collections</div>
-                        </div>
-                        <div class="route-stat-item">
-                            <div class="route-stat-value">₱1,275</div>
-                            <div class="route-stat-label">Total</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Details Grid -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Route Name</div>
-                            <div style="font-weight: 600; color: #333;">Barangay Lahug Morning Route</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Zone</div>
-                            <div style="font-weight: 600; color: #333;">Zone A - Lahug</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Start Point</div>
-                            <div style="font-weight: 600; color: #333;">Cebu City Hall</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">End Point</div>
-                            <div style="font-weight: 600; color: #333;">Lahug Market</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Total Weight</div>
-                            <div style="font-weight: 600; color: #2e7d32; font-size: 1.2rem;">255 kg</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Driver</div>
-                            <div style="font-weight: 600; color: #333;"><?php echo $driver_name; ?></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Notes -->
-                    <div>
-                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px; font-weight: 500;">Route Summary</div>
-                        <div style="background: #f8fdf9; padding: 15px; border-radius: 8px; border: 1px solid #e8f5e9;">
-                            <p style="margin: 0; color: #555; font-size: 0.95rem;">
-                                Successfully completed morning collection route covering Barangay Lahug area. 
-                                Collected mixed recyclables from 15 households and businesses. 
-                                No major issues encountered during the route.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Collection Breakdown -->
-                    <div>
-                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px; font-weight: 500;">Collection Breakdown</div>
-                        <div style="background: #f0f7f3; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #666;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>Plastic</span>
-                                <span style="font-weight: 600;">85 kg (₱425)</span>
+                    <div class="modal-body">
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Header -->
+                            <div style="background: #f8fdf9; padding: 20px; border-radius: 12px; border-left: 4px solid #2196f3;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div>
+                                        <div style="font-size: 1.2rem; font-weight: 600; color: #2c3e50; margin-bottom: 5px;">${route.name}</div>
+                                        <div style="font-size: 0.9rem; color: #666;">Completed on ${route.completed}</div>
+                                    </div>
+                                    <span class="status-badge status-completed">Completed</span>
+                                </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>Paper</span>
-                                <span style="font-weight: 600;">75 kg (₱375)</span>
+                            
+                            <!-- Route Stats -->
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div style="padding: 15px; background: #f8fdf9; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #2e7d32; margin-bottom: 5px;">${route.distance}</div>
+                                    <div style="font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Distance</div>
+                                </div>
+                                <div style="padding: 15px; background: #f8fdf9; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #2e7d32; margin-bottom: 5px;">${route.time}</div>
+                                    <div style="font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Duration</div>
+                                </div>
+                                <div style="padding: 15px; background: #f8fdf9; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #2e7d32; margin-bottom: 5px;">${route.stops}</div>
+                                    <div style="font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Stops</div>
+                                </div>
+                                <div style="padding: 15px; background: #f8fdf9; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #2e7d32; margin-bottom: 5px;">${route.amount}</div>
+                                    <div style="font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Total</div>
+                                </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>Glass</span>
-                                <span style="font-weight: 600;">45 kg (₱225)</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>Metal</span>
-                                <span style="font-weight: 600;">50 kg (₱250)</span>
+                            
+                            <!-- Details Grid -->
+                            <div class="route-info-grid">
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-signature"></i> Route Name</div>
+                                    <div class="info-value">${route.name}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-road"></i> Distance</div>
+                                    <div class="info-value">${route.distance}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-clock"></i> Duration</div>
+                                    <div class="info-value">${route.time}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-trash-alt"></i> Stops Completed</div>
+                                    <div class="info-value">${route.stops}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-weight"></i> Total Weight</div>
+                                    <div class="info-value">${route.weight}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-money-bill-wave"></i> Total Earnings</div>
+                                    <div class="info-value" style="color: #4caf50; font-weight: 600;">${route.amount}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-map-marked-alt"></i> Barangay</div>
+                                    <div class="info-value">${route.barangay}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="fas fa-layer-group"></i> Zones</div>
+                                    <div class="info-value">${route.zones}</div>
+                                </div>
+                                <div class="info-item full-width">
+                                    <div class="info-label"><i class="fas fa-calendar-check"></i> Completed On</div>
+                                    <div class="info-value">${route.completed}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Buttons -->
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="btn btn-primary" style="flex: 1;" onclick="printDetails(${id}, 'route')">
+                    <div class="modal-footer">
+                        <button class="btn btn-outline close-modal">Close</button>
+                        <button class="btn btn-primary" onclick="printRouteDetails('${route.name}')">
                             <i class="fas fa-print"></i> Print Summary
-                        </button>
-                        <button class="btn btn-secondary" style="flex: 1;" onclick="exportRouteData(${id})">
-                            <i class="fas fa-file-export"></i> Export Data
                         </button>
                     </div>
                 </div>
             `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal events
+            modal.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => modal.remove());
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) modal.remove();
+            });
+        }
+        
+        function showNotesModal(notes) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-sticky-note"></i> Route Notes</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="notes-content">
+                            <p>${notes}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline close-modal">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            modal.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => modal.remove());
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) modal.remove();
+            });
         }
         
         function printDetails(id, type) {
@@ -1582,15 +1913,15 @@ function generateSampleRoutes() {
             // In a real application, this would open a print dialog with formatted content
         }
         
+        function printRouteDetails(routeName) {
+            alert(`Printing route summary for: ${routeName}`);
+            // In a real application, this would open a print dialog
+        }
+        
         function sendReceipt(id, type) {
             alert(`Sending ${type === 'collection' ? 'receipt' : 'summary'} to customer for ID: ${id}`);
             // In a real application, this would send via email or SMS
         }
-        
-        function exportRouteData(id) {
-            alert(`Exporting route data for ID: ${id}`);
-            // In a real application, this would download a CSV or PDF file
-        }
     </script>
 </body>
-</html>
+</html> 
