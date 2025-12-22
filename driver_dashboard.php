@@ -120,9 +120,9 @@ if (isset($link) && $link !== null) {
         /* Dashboard Grid Layout - Matching routes.php */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 30px;
-            margin-top: 30px;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            margin-top: 20px;
         }
         
         @media (max-width: 1200px) {
@@ -133,8 +133,8 @@ if (isset($link) && $link !== null) {
         
         .dashboard-card {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(0, 0, 0, 0.05);
@@ -152,16 +152,16 @@ if (isset($link) && $link !== null) {
             bottom: 0;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             z-index: -1;
-            border-radius: 20px;
+            border-radius: 12px;
         }
         
         .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
         
         .card-header {
-            padding: 24px;
+            padding: 16px 20px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: space-between;
@@ -172,52 +172,52 @@ if (isset($link) && $link !== null) {
         .card-header h3 {
             margin: 0;
             color: #2c3e50;
-            font-size: 1.3rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             font-weight: 600;
         }
         
         .card-header i {
             color: #2e7d32;
-            font-size: 1.4rem;
+            font-size: 1.1rem;
         }
         
         /* Stats Cards - Matching routes.php style */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 24px;
+            gap: 12px;
+            padding: 16px;
         }
         
         .stat-item {
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
-            padding: 20px;
-            border-radius: 16px;
+            padding: 14px;
+            border-radius: 10px;
             text-align: center;
             border: 1px solid rgba(232, 245, 233, 0.5);
             transition: all 0.3s ease;
         }
         
         .stat-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
         
         .stat-value {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #2e7d32;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .stat-label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #666;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             font-weight: 500;
         }
         
@@ -225,8 +225,8 @@ if (isset($link) && $link !== null) {
         .content-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-top: 20px;
+            gap: 16px;
+            margin-top: 16px;
         }
         
         @media (max-width: 768px) {
@@ -240,37 +240,37 @@ if (isset($link) && $link !== null) {
         }
         
         .content-card {
-            padding: 24px;
+            padding: 20px;
             height: 100%;
             display: flex;
             flex-direction: column;
         }
         
         .content-icon {
-            width: 60px;
-            height: 60px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(46, 125, 50, 0.05));
-            border-radius: 14px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
             color: #2e7d32;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
         }
         
         .content-card h3 {
             color: #2c3e50;
-            margin-bottom: 12px;
-            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-size: 1rem;
             font-weight: 600;
         }
         
         .content-card p {
             color: #666;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
             flex: 1;
         }
         
@@ -278,16 +278,17 @@ if (isset($link) && $link !== null) {
             background: linear-gradient(135deg, #4caf50, #2e7d32);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
+            padding: 10px 18px;
+            border-radius: 8px;
             text-decoration: none;
             text-align: center;
             font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: fit-content;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
             font-size: 0.95rem;
             cursor: pointer;
@@ -303,8 +304,8 @@ if (isset($link) && $link !== null) {
         .quick-actions-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            padding: 24px;
+            gap: 12px;
+            padding: 16px;
         }
         
         @media (max-width: 1200px) {
@@ -321,8 +322,8 @@ if (isset($link) && $link !== null) {
         
         .action-item {
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
-            padding: 20px;
-            border-radius: 16px;
+            padding: 14px;
+            border-radius: 10px;
             text-align: center;
             border: 1px solid rgba(232, 245, 233, 0.5);
             transition: all 0.3s ease;
@@ -333,55 +334,56 @@ if (isset($link) && $link !== null) {
         }
         
         .action-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
             border-color: #4caf50;
             background: linear-gradient(135deg, rgba(232, 245, 233, 0.9), rgba(241, 248, 233, 0.8));
         }
         
         .action-icon {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 16px;
+            margin: 0 auto 12px;
             color: #2e7d32;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
         
         .action-item h4 {
             color: #2c3e50;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .action-item p {
             color: #666;
-            font-size: 0.85rem;
-            line-height: 1.4;
+            font-size: 0.75rem;
+            line-height: 1.3;
         }
         
         /* Welcome Section */
         .page-header {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .page-title {
             color: #2c3e50;
-            margin-bottom: 8px;
-            font-size: 2.2rem;
+            margin-bottom: 6px;
+            font-size: 1.6rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
         
         .page-subtitle {
             color: #666;
+            font-size: 0.95rem;
             font-size: 1.1rem;
             max-width: 600px;
             line-height: 1.5;
@@ -391,20 +393,20 @@ if (isset($link) && $link !== null) {
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 30px;
-            padding: 15px;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 10px 14px;
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             animation: fadeInUp 0.6s ease;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(232, 245, 233, 0.5);
         }
         
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #4caf50;
             animation: pulse 2s infinite;
@@ -413,6 +415,7 @@ if (isset($link) && $link !== null) {
         .status-text {
             color: #666;
             font-weight: 500;
+            font-size: 0.9rem;
         }
         
         @keyframes fadeInUp {
@@ -547,8 +550,8 @@ if (isset($link) && $link !== null) {
         .activity-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding: 24px;
+            gap: 10px;
+            padding: 16px;
             max-height: 300px;
             overflow-y: auto;
         }
@@ -556,45 +559,45 @@ if (isset($link) && $link !== null) {
         .activity-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
+            gap: 12px;
+            padding: 12px;
             background: linear-gradient(135deg, rgba(248, 253, 249, 0.8), rgba(240, 255, 244, 0.6));
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid rgba(232, 245, 233, 0.5);
             transition: all 0.3s ease;
         }
         
         .activity-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
         }
         
         .activity-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #2e7d32;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         
         .activity-content h4 {
             color: #2c3e50;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
         
         .activity-content p {
             color: #666;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         
         .activity-time {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #888;
             margin-left: auto;
             white-space: nowrap;
@@ -622,20 +625,22 @@ if (isset($link) && $link !== null) {
         .notification-list::-webkit-scrollbar-thumb:hover {
             background: rgba(76, 175, 80, 0.8);
         }
-
-
         
         /* Main content enhancements */
         .main-content {
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 20px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 30px;
+            padding: 0 20px;
+        }
+        
+        .dashboard-main {
+            padding-top: 20px;
         }
     </style>
 </head>
